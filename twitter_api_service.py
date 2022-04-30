@@ -7,17 +7,68 @@ from utils import logger
 
 
 class TwitterAPIService:
-    """Handle API requests"""
+    """Handle API requests
 
-    def __init__(self) -> None:
+    :type forme: bool
+    :param forme: Whether the API will be used for account owner or authorized user
+    """
 
+    def __init__(self, forme: bool = False) -> None:
+
+        self._forme = forme
         self._api_v1 = None
         self._api_v2 = None
         self._authorized_client = None
+        self._current_client = None
         self._external_user_creds_file = "external_user_creds.json"
 
-    def setup_api_access_v1(self) -> None:
-        """Setup access for Twitter v1 api"""
+    def setup_api_access(self) -> None:
+        """Setup access for developer or authorized user"""
+
+        if self._forme:
+            self._setup_api_access_v2()
+            self._current_client = self._api_v2
+        else:
+            self._authorize_with_pin()
+            self._current_client = self._authorized_client
+
+    def get_user(
+        self,
+        username: str,
+        user_fields: list[str] = None,
+        expansions: str = None,
+        user_auth: bool = False,
+    ) -> tuple:
+        """Get user given by username
+
+        Pass user fields, tweet fields, and expansions for additional data.
+
+        https://docs.tweepy.org/en/latest/client.html#user-fields
+        https://docs.tweepy.org/en/latest/client.html#expansions
+
+        :type username: str
+        :param username: Twitter username
+        :type user_fields: list
+        :param user_fields: Additional user fields to get
+        :type expansions: list
+        :param expansions: Additional data objects to get
+        :rtype: tuple
+        :returns: Response data and includes objects as tuple
+        """
+
+        response = self._current_client.get_user(
+            username=username,
+            user_fields=user_fields,
+            expansions=expansions,
+            user_auth=user_auth,
+        )
+
+        return (response.data, response.includes)
+
+    def _setup_api_access_v1(self) -> None:
+        """Setup access for Twitter v1 API"""
+
+        logger.debug("Setting up v1 API access...")
 
         try:
             ACCESS_TOKEN = os.environ["TWITTER_ACCESS_TOKEN"]
@@ -32,8 +83,10 @@ class TwitterAPIService:
 
         self._api_v1 = tweepy.API(auth, wait_on_rate_limit=True)
 
-    def setup_api_access_v2(self) -> None:
-        """Setup access for Twitter v2 api as app"""
+    def _setup_api_access_v2(self) -> None:
+        """Setup access for Twitter v2 API as app"""
+
+        logger.debug("Setting up v2 API access...")
 
         try:
             BEARER_TOKEN = os.environ["TWITTER_BEARER_TOKEN_CODE"]
@@ -42,8 +95,10 @@ class TwitterAPIService:
 
         self._api_v2 = tweepy.Client(bearer_token=BEARER_TOKEN, wait_on_rate_limit=True)
 
-    def authorize_with_pin(self) -> None:
+    def _authorize_with_pin(self) -> None:
         """Authorize user using the PIN authentication"""
+
+        logger.debug("Setting up v2 API access for authorized user...")
 
         try:
             CONSUMER_KEY = os.environ["TWITTER_CONSUMER_KEY_CODE"]
