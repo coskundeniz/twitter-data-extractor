@@ -8,7 +8,7 @@ from twitter_api_service import TwitterAPIService
 class UserExtractor(BaseExtractor):
     """Extract data for a single user
 
-    :type cmdline_args: "Namespace"
+    :type cmdline_args: Namespace
     :param cmdline_args: Command line args returned by ArgumentParser
     """
 
@@ -55,9 +55,11 @@ class UserExtractor(BaseExtractor):
             user_auth=self._is_authorized_user,
         )
 
-        if not user[0]:  # fields
+        if not user[0]:  # response.data
             raise UserNotFoundError(f"User with username={self._username} could not be found!")
 
         user_data = User(user)
+
+        logger.debug(f"User data: {user_data}")
 
         return user_data

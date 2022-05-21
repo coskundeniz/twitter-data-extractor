@@ -44,7 +44,11 @@ class User:
 
         user_data_format += f"\tPinned tweet id: {self._fields.pinned_tweet_id}\n"
         if self._includes:
-            user_data_format += f"\tPinned tweet: {self._includes['tweets'][0]['text']}\n"
+            try:
+                user_data_format += f"\tPinned tweet: {self._includes['tweets'][0]['text']}\n"
+            except KeyError:
+                # get pinned tweet text for get_friends/followers includes field
+                user_data_format += f"\tPinned tweet: {self._includes['text']}\n"
 
         user_data_format += f"\tUser profile image url: {self._fields.profile_image_url}\n"
         user_data_format += f"\tIs account private: {'YES' if self._fields.protected else 'NO'}\n"

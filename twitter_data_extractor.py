@@ -39,6 +39,9 @@ def get_arg_parser() -> ArgumentParser:
         help="Determine API user(accounut owner or on behalf of a user)",
     )
     arg_parser.add_argument("-u", "--user", help="Extract user data for the given username")
+    arg_parser.add_argument(
+        "-fr", "--friends", action="store_true", help="Extract friends data for the given username"
+    )
 
     return arg_parser
 
@@ -63,7 +66,10 @@ def main(args) -> None:
     except (MissingUsernameParameterError, UserNotFoundError) as exp:
         handle_exception(exp)
 
-    print(extracted_data)
+    # print(extracted_data)
+
+    for friend in extracted_data:
+        print(friend)
 
 
 if __name__ == "__main__":

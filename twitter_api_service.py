@@ -1,9 +1,13 @@
 import os
 import json
+from typing import Optional, Generator
 
 import tweepy
 
 from utils import logger
+
+
+FriendGenerator = Generator[tuple[tweepy.user.User, tweepy.tweet.Tweet], None, None]
 
 
 class TwitterAPIService:
@@ -35,9 +39,9 @@ class TwitterAPIService:
     def get_user(
         self,
         username: str,
-        user_fields: list[str] = None,
-        expansions: str = None,
-        user_auth: bool = False,
+        user_fields: Optional[list[str]] = None,
+        expansions: Optional[str] = None,
+        user_auth: Optional[bool] = False,
     ) -> tuple:
         """Get user given by username
 
@@ -52,8 +56,10 @@ class TwitterAPIService:
         :param user_fields: Additional user fields to get
         :type expansions: list
         :param expansions: Additional data objects to get
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
         :rtype: tuple
-        :returns: Response data and includes objects as tuple
+        :returns: User data and includes objects as tuple
         """
 
         response = self._current_client.get_user(
@@ -64,6 +70,57 @@ class TwitterAPIService:
         )
 
         return (response.data, response.includes)
+
+    def get_friends(
+        self,
+        username: str,
+        user_fields: Optional[list[str]] = None,
+        expansions: Optional[str] = None,
+        user_auth: Optional[bool] = False,
+        max_results: Optional[int] = 1000,
+    ) -> FriendGenerator:
+        """Get friends data for the username
+
+        :type username: str
+        :param username: Twitter username
+        :type user_fields: list
+        :param user_fields: Additional user fields to get
+        :type expansions: list
+        :param expansions: Additional data objects to get
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
+        :type max_results: int
+        :param max_results: Number of maximum results to get for a page
+        :rtype: Generator
+        :returns: List of user data and includes objects as tuple
+        """
+
+        user = self.get_user(username)[0]
+
+        for response in tweepy.Paginator(
+            self._current_client.get_users_following,
+            user.id,
+            max_results=max_results,
+            user_fields=user_fields,
+            expansions=expansions,
+            user_auth=user_auth,
+        ):
+            friends_data, friends_includes = response.data, response.includes["tweets"]
+
+            user_include_pairs = []
+
+            for friend_data in friends_data:
+                pinned_tweet_id = friend_data.pinned_tweet_id
+
+                for tweet in friends_includes:
+                    if pinned_tweet_id == tweet["id"]:
+                        user_include_pairs.append((friend_data, tweet))
+                        break
+                else:
+                    user_include_pairs.append((friend_data, None))
+
+            for friend_data in user_include_pairs:
+                yield friend_data
 
     def _setup_api_access_v1(self) -> None:
         """Setup access for Twitter v1 API"""

@@ -1,5 +1,6 @@
 from extractors import base_extractor
 from extractors.user import UserExtractor
+from extractors.friends import FriendsExtractor
 from exceptions import UnsupportedExtractorError
 
 
@@ -23,8 +24,10 @@ class ExtractorFactory:
 
         # if (cmdline_args.user and
         # not (cmdline_args.friends or cmdline_args.followers or cmdline_args.ff)):
-        if cmdline_args.user:
+        if cmdline_args.user and not cmdline_args.friends:
             extractor = UserExtractor(cmdline_args)
+        elif cmdline_args.user and cmdline_args.friends:
+            extractor = FriendsExtractor(cmdline_args)
         else:
             raise UnsupportedExtractorError("Unsupported extractor! Check your parameters.")
 
