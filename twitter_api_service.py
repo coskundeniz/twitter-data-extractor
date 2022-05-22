@@ -4,10 +4,12 @@ from typing import Optional, Generator
 
 import tweepy
 
+from exceptions import PrivateAccountError
 from utils import logger
 
 
 FriendGenerator = Generator[tuple[tweepy.user.User, tweepy.tweet.Tweet], None, None]
+FollowerGenerator = Generator[tuple[tweepy.user.User, tweepy.tweet.Tweet], None, None]
 
 
 class TwitterAPIService:
@@ -95,6 +97,9 @@ class TwitterAPIService:
         :returns: List of user data and includes objects as tuple
         """
 
+        if self._is_account_protected(username):
+            raise PrivateAccountError("Could not extract data from private account!")
+
         user = self.get_user(username)[0]
 
         for response in tweepy.Paginator(
@@ -121,6 +126,74 @@ class TwitterAPIService:
 
             for friend_data in user_include_pairs:
                 yield friend_data
+
+    def get_followers(
+        self,
+        username: str,
+        user_fields: Optional[list[str]] = None,
+        expansions: Optional[str] = None,
+        user_auth: Optional[bool] = False,
+        max_results: Optional[int] = 1000,
+    ) -> FollowerGenerator:
+        """Get followers data for the username
+
+        :type username: str
+        :param username: Twitter username
+        :type user_fields: list
+        :param user_fields: Additional user fields to get
+        :type expansions: list
+        :param expansions: Additional data objects to get
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
+        :type max_results: int
+        :param max_results: Number of maximum results to get for a page
+        :rtype: Generator
+        :returns: List of user data and includes objects as tuple
+        """
+
+        if self._is_account_protected(username):
+            raise PrivateAccountError("Could not extract data from private account!")
+
+        user = self.get_user(username)[0]
+
+        for response in tweepy.Paginator(
+            self._current_client.get_users_followers,
+            user.id,
+            max_results=max_results,
+            user_fields=user_fields,
+            expansions=expansions,
+            user_auth=user_auth,
+        ):
+            followers_data, followers_includes = response.data, response.includes["tweets"]
+
+            user_include_pairs = []
+
+            # TODO: ?? Pinned tweet can be removed for followers ??
+            for follower_data in followers_data:
+                pinned_tweet_id = follower_data.pinned_tweet_id
+
+                for tweet in followers_includes:
+                    if pinned_tweet_id == tweet["id"]:
+                        user_include_pairs.append((follower_data, tweet))
+                        break
+                else:
+                    user_include_pairs.append((follower_data, None))
+
+            for follower_data in user_include_pairs:
+                yield follower_data
+
+    def _is_account_protected(self, username: str) -> bool:
+        """Check if account is protected
+
+        :type username: str
+        :param username: Twitter username
+        :rtype: bool
+        :returns: Whether account is protected
+        """
+
+        response = self._current_client.get_user(username=username, user_fields="protected")
+
+        return response.data.protected
 
     def _setup_api_access_v1(self) -> None:
         """Setup access for Twitter v1 API"""

@@ -5,6 +5,7 @@ from exceptions import (
     TwitterDataExtractorException,
     MissingUsernameParameterError,
     UserNotFoundError,
+    PrivateAccountError,
 )
 from factory.extractor_factory import ExtractorFactory
 from twitter_api_service import TwitterAPIService
@@ -42,6 +43,12 @@ def get_arg_parser() -> ArgumentParser:
     arg_parser.add_argument(
         "-fr", "--friends", action="store_true", help="Extract friends data for the given username"
     )
+    arg_parser.add_argument(
+        "-fl",
+        "--followers",
+        action="store_true",
+        help="Extract followers data for the given username",
+    )
 
     return arg_parser
 
@@ -63,13 +70,19 @@ def main(args) -> None:
 
     try:
         extracted_data = extractor.extract_data(api_service)
-    except (MissingUsernameParameterError, UserNotFoundError) as exp:
+    except (
+        MissingUsernameParameterError,
+        UserNotFoundError,
+    ) as exp:
         handle_exception(exp)
 
     # print(extracted_data)
 
-    for friend in extracted_data:
-        print(friend)
+    try:
+        for user_data in extracted_data:
+            print(user_data)
+    except PrivateAccountError as exp:
+        handle_exception(exp)
 
 
 if __name__ == "__main__":

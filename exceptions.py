@@ -12,3 +12,7 @@ class UserNotFoundError(TwitterDataExtractorException):
 
 class UnsupportedExtractorError(TwitterDataExtractorException):
     """Unsupported extractor"""
+
+
+class PrivateAccountError(TwitterDataExtractorException):
+    """Private account error"""
