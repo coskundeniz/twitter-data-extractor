@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from typing import Generator
 
 from exceptions import (
     UnsupportedExtractorError,
@@ -76,13 +77,14 @@ def main(args) -> None:
     ) as exp:
         handle_exception(exp)
 
-    # print(extracted_data)
-
-    try:
-        for user_data in extracted_data:
-            print(user_data)
-    except PrivateAccountError as exp:
-        handle_exception(exp)
+    if not isinstance(extracted_data, Generator):
+        print(extracted_data)
+    else:
+        try:
+            for user_data in extracted_data:
+                print(user_data)
+        except PrivateAccountError as exp:
+            handle_exception(exp)
 
 
 if __name__ == "__main__":

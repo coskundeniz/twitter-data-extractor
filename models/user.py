@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass, field
 
 
@@ -8,56 +9,93 @@ class User:
     data: dict = field(default_factory=dict, init=False)
 
     def __post_init__(self):
+        """Construct the data dictionary for the User model for reporters"""
+
         self._fields, self._includes = self.user
 
         self.data["id"] = self._fields.id
         self.data["name"] = self._fields.name
         self.data["username"] = self._fields.username
 
-    def __str__(self) -> str:
-
-        user_data_format = f"{self._fields.id}:{self._fields.username}:{self._fields.name}\n"
-
-        user_data_format += f"\tCreated at: {self._fields.created_at}\n"
-        user_data_format += f"\tBio: {self._fields.description}\n"
+        self.data["created_at"] = self._fields.created_at
+        self.data["description"] = self._fields.description
 
         if self._fields.entities:
             entities = self._fields.entities
+            self.data["entities"] = defaultdict(dict)
 
             if "url" in entities:
-                user_data_format += "\tURLs\n"
+                self.data["entities"]["url_items"] = []
+
                 for url_item in entities["url"]["urls"]:
-                    user_data_format += f"\t\t{url_item['url']}\n"
+                    self.data["entities"]["url_items"].append(url_item["url"])
 
             if "description" in entities:
+                self.data["entities"]["hashtag_items"] = []
+
                 if "hashtags" in entities["description"]:
-                    user_data_format += "\tHashtags\n"
                     for hashtag_item in entities["description"]["hashtags"]:
-                        user_data_format += f"\t\t{hashtag_item['tag']}\n"
+                        self.data["entities"]["hashtag_items"].append(hashtag_item["tag"])
 
                 if "mentions" in entities["description"]:
-                    user_data_format += "\tMentions\n"
+                    self.data["entities"]["mention_items"] = []
                     for mention_item in entities["description"]["mentions"]:
-                        user_data_format += f"\t\t{mention_item['username']}\n"
+                        self.data["entities"]["mention_items"].append(mention_item["username"])
 
-        user_data_format += f"\tLocation: {self._fields.location}\n"
+        self.data["location"] = self._fields.location
 
-        user_data_format += f"\tPinned tweet id: {self._fields.pinned_tweet_id}\n"
+        self.data["pinned_tweet_id"] = self._fields.pinned_tweet_id
+
         if self._includes:
             try:
-                user_data_format += f"\tPinned tweet: {self._includes['tweets'][0]['text']}\n"
+                self.data["pinned_tweet_text"] = self._includes["tweets"][0]["text"]
             except KeyError:
                 # get pinned tweet text for get_friends/followers includes field
-                user_data_format += f"\tPinned tweet: {self._includes['text']}\n"
+                self.data["pinned_tweet_text"] = self._includes["text"]
 
-        user_data_format += f"\tUser profile image url: {self._fields.profile_image_url}\n"
-        user_data_format += f"\tIs account private: {'YES' if self._fields.protected else 'NO'}\n"
+        self.data["profile_image_url"] = self._fields.profile_image_url
+        self.data["protected"] = self._fields.protected
+
+        self.data["public_metrics"] = self._fields.public_metrics
+
+        self.data["url"] = self._fields.url
+        self.data["verified"] = self._fields.verified
+
+    def __str__(self) -> str:
+
+        user_data_format = f"{self.data['id']}:{self.data['username']}:{self.data['name']}\n"
+
+        user_data_format += f"\tCreated at: {self.data['created_at']}\n"
+        user_data_format += f"\tBio: {self.data['description']}\n"
+
+        if self._fields.entities:
+
+            user_data_format += "\tURLs\n" if self.data["entities"]["url_items"] else ""
+            for url_item in self.data["entities"]["url_items"]:
+                user_data_format += f"\t\t{url_item}\n"
+
+            user_data_format += "\tHashtags\n" if self.data["entities"]["hashtag_items"] else ""
+            for hashtag_item in self.data["entities"]["hashtag_items"]:
+                user_data_format += f"\t\t{hashtag_item}\n"
+
+            user_data_format += "\tMentions\n" if self.data["entities"]["mention_items"] else ""
+            for mention_item in self.data["entities"]["mention_items"]:
+                user_data_format += f"\t\t{mention_item}\n"
+
+        user_data_format += f"\tLocation: {self.data['location']}\n"
+
+        user_data_format += f"\tPinned tweet id: {self.data['pinned_tweet_id']}\n"
+        if self._includes:
+            user_data_format += f"\tPinned tweet: {self.data['pinned_tweet_text']}\n"
+
+        user_data_format += f"\tUser profile image url: {self.data['profile_image_url']}\n"
+        user_data_format += f"\tIs account private: {'YES' if self.data['protected'] else 'NO'}\n"
 
         user_data_format += "\tPublic metrics\n"
-        for metric, value in self._fields.public_metrics.items():
+        for metric, value in self.data["public_metrics"].items():
             user_data_format += f"\t\t{metric}: {value}\n"
 
-        user_data_format += f"\tUrl: {self._fields.url}\n"
-        user_data_format += f"\tVerified: {self._fields.verified}\n"
+        user_data_format += f"\tUrl: {self.data['url']}\n"
+        user_data_format += f"\tVerified: {self.data['verified']}\n"
 
         return user_data_format
