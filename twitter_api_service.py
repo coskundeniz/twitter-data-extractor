@@ -168,7 +168,6 @@ class TwitterAPIService:
 
             user_include_pairs = []
 
-            # TODO: ?? Pinned tweet can be removed for followers ??
             for follower_data in followers_data:
                 pinned_tweet_id = follower_data.pinned_tweet_id
 

@@ -20,9 +20,10 @@ class User:
         self.data["created_at"] = self._fields.created_at
         self.data["description"] = self._fields.description
 
+        self.data["entities"] = defaultdict(dict)
+
         if self._fields.entities:
             entities = self._fields.entities
-            self.data["entities"] = defaultdict(dict)
 
             if "url" in entities:
                 self.data["entities"]["url_items"] = []
@@ -44,7 +45,7 @@ class User:
 
         self.data["location"] = self._fields.location
 
-        self.data["pinned_tweet_id"] = self._fields.pinned_tweet_id
+        self.data["pinned_tweet_id"] = str(self._fields.pinned_tweet_id)
 
         if self._includes:
             try:
@@ -52,6 +53,8 @@ class User:
             except KeyError:
                 # get pinned tweet text for get_friends/followers includes field
                 self.data["pinned_tweet_text"] = self._includes["text"]
+        else:
+            self.data["pinned_tweet_text"] = ""
 
         self.data["profile_image_url"] = self._fields.profile_image_url
         self.data["protected"] = self._fields.protected
@@ -88,7 +91,7 @@ class User:
         if self._includes:
             user_data_format += f"\tPinned tweet: {self.data['pinned_tweet_text']}\n"
 
-        user_data_format += f"\tUser profile image url: {self.data['profile_image_url']}\n"
+        user_data_format += f"\tProfile image url: {self.data['profile_image_url']}\n"
         user_data_format += f"\tIs account private: {'YES' if self.data['protected'] else 'NO'}\n"
 
         user_data_format += "\tPublic metrics\n"

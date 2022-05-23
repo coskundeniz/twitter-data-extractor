@@ -1,5 +1,6 @@
 import json
 import logging
+from enum import Enum, auto
 from logging.handlers import RotatingFileHandler
 
 # from exceptions import UnsupportedConfigFileError
@@ -32,6 +33,14 @@ logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
 
+class ExtractedDataType(Enum):
+
+    USER = auto()
+    FRIENDS = auto()
+    FOLLOWERS = auto()
+    TWEETS = auto()
+
+
 def get_configuration(filename: str = "config.json") -> dict:
     """Read configuration file
 
@@ -48,3 +57,19 @@ def get_configuration(filename: str = "config.json") -> dict:
         config = json.load(configfile)
 
     return config
+
+
+def get_extracted_data_type(args) -> ExtractedDataType:
+
+    result = None
+
+    if args.user and not (args.friends or args.followers):
+        result = ExtractedDataType.USER
+    elif args.user and args.friends:
+        result = ExtractedDataType.FRIENDS
+    elif args.user and args.followers:
+        result = ExtractedDataType.FOLLOWERS
+    else:
+        pass
+
+    return result

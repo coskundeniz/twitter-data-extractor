@@ -16,3 +16,7 @@ class UnsupportedExtractorError(TwitterDataExtractorException):
 
 class PrivateAccountError(TwitterDataExtractorException):
     """Private account error"""
+
+
+class UnsupportedOutputFileError(TwitterDataExtractorException):
+    """Unsupported output file type"""

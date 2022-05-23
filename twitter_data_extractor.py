@@ -7,8 +7,10 @@ from exceptions import (
     MissingUsernameParameterError,
     UserNotFoundError,
     PrivateAccountError,
+    UnsupportedOutputFileError,
 )
 from factory.extractor_factory import ExtractorFactory
+from factory.reporter_factory import ReporterFactory
 from twitter_api_service import TwitterAPIService
 from utils import logger, get_configuration
 
@@ -50,6 +52,14 @@ def get_arg_parser() -> ArgumentParser:
         action="store_true",
         help="Extract followers data for the given username",
     )
+    # ... more extractors here
+    arg_parser.add_argument(
+        "-ot",
+        "--output_type",
+        default="csv",
+        help="Output file type (csv, excel, gsheets, mongodb or sqlite)",
+    )
+    arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
 
     return arg_parser
 
@@ -77,14 +87,20 @@ def main(args) -> None:
     ) as exp:
         handle_exception(exp)
 
-    if not isinstance(extracted_data, Generator):
-        print(extracted_data)
-    else:
-        try:
-            for user_data in extracted_data:
-                print(user_data)
-        except PrivateAccountError as exp:
-            handle_exception(exp)
+    try:
+        reporter = ReporterFactory.get_reporter(args)
+    except UnsupportedOutputFileError as exp:
+        handle_exception(exp)
+
+    reporter.save(extracted_data)
+
+    # if isinstance(extracted_data, Generator):
+
+    #     try:
+    #         for user_data in extracted_data:
+    #             print(user_data)
+    #     except PrivateAccountError as exp: # where to handle this ???
+    #         handle_exception(exp)
 
 
 if __name__ == "__main__":
