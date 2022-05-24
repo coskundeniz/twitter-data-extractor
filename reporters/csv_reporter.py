@@ -37,15 +37,18 @@ class CsvReporter(FileReporter):
             writer.writerow(CsvReporter._get_user_row_data(data))
 
     def _save_users_data(self, extracted_data: list[User]) -> None:
-        """Save friends/followers data
+        """Save usersfriends/followers data
 
         :type extracted_data: list
-        :param extracted_data: List of Users(friends/followers)
+        :param extracted_data: List of Users(users/friends/followers)
         """
 
         is_friends_data = self._extracted_data_type == ExtractedDataType.FRIENDS
 
-        logger.debug(f"Saving {'friends' if is_friends_data else 'followers'} data...")
+        if self._extracted_data_type == ExtractedDataType.USERS:
+            logger.debug("Saving users data...")
+        else:
+            logger.debug(f"Saving {'friends' if is_friends_data else 'followers'} data...")
 
         with open(self._filename, "w", newline="") as csvfile:
             writer = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)

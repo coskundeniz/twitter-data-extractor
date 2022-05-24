@@ -42,7 +42,8 @@ class FileReporter(ABC):
         if self._extracted_data_type == ExtractedDataType.USER:
             self._save_user_data(extracted_data)
         elif (
-            self._extracted_data_type == ExtractedDataType.FRIENDS
+            self._extracted_data_type == ExtractedDataType.USERS
+            or self._extracted_data_type == ExtractedDataType.FRIENDS
             or self._extracted_data_type == ExtractedDataType.FOLLOWERS
         ):
             self._save_users_data(extracted_data)
@@ -57,7 +58,7 @@ class FileReporter(ABC):
 
     @abstractmethod
     def _save_users_data(self, extracted_data) -> None:
-        """Save friends/followers data"""
+        """Save users/friends/followers data"""
 
     @abstractmethod
     def _save_tweets_data(self, extracted_data) -> None:

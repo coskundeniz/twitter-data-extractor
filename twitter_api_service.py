@@ -73,6 +73,56 @@ class TwitterAPIService:
 
         return (response.data, response.includes)
 
+    def get_users(
+        self,
+        usernames: str,
+        user_fields: Optional[list[str]] = None,
+        expansions: Optional[str] = None,
+        user_auth: Optional[bool] = False,
+    ) -> list:
+        """Get users given by usernames
+
+        Pass user fields, tweet fields, and expansions for additional data.
+
+        https://docs.tweepy.org/en/latest/client.html#user-fields
+        https://docs.tweepy.org/en/latest/client.html#expansions
+
+        :type usernames: list
+        :param usernames: Twitter usernames
+        :type user_fields: list
+        :param user_fields: Additional user fields to get
+        :type expansions: list
+        :param expansions: Additional data objects to get
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
+        :rtype: list
+        :returns: List of user data and includes objects as tuple
+        """
+
+        response = self._current_client.get_users(
+            usernames=usernames,
+            user_fields=user_fields,
+            expansions=expansions,
+            user_auth=user_auth,
+        )
+
+        users_data, users_includes = response.data, response.includes["tweets"]
+
+        user_include_pairs = []
+
+        # There are less pinned tweets than users, so we need to match them.
+        for user_data in users_data:
+            pinned_tweet_id = user_data.pinned_tweet_id
+
+            for tweet in users_includes:
+                if pinned_tweet_id == tweet["id"]:
+                    user_include_pairs.append((user_data, tweet))
+                    break
+            else:
+                user_include_pairs.append((user_data, None))
+
+        return user_include_pairs
+
     def get_friends(
         self,
         username: str,

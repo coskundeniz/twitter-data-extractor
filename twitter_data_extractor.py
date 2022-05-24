@@ -43,6 +43,7 @@ def get_arg_parser() -> ArgumentParser:
         help="Determine API user(accounut owner or on behalf of a user)",
     )
     arg_parser.add_argument("-u", "--user", help="Extract user data for the given username")
+    arg_parser.add_argument("-ul", "--users", help="Extract user data for the given usernames")
     arg_parser.add_argument(
         "-fr", "--friends", action="store_true", help="Extract friends data for the given username"
     )

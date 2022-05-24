@@ -1,8 +1,13 @@
+from typing import Generator
+
 from exceptions import MissingUsernameParameterError, UserNotFoundError
 from extractors.base_extractor import BaseExtractor
 from models.user import User
 from utils import logger
 from twitter_api_service import TwitterAPIService
+
+
+Users = Generator[User, None, None]
 
 
 class UserExtractor(BaseExtractor):
@@ -63,3 +68,49 @@ class UserExtractor(BaseExtractor):
         logger.debug(f"User data: {user_data}")
 
         return user_data
+
+
+class UsersExtractor(UserExtractor):
+    """Extract data for multiple users
+
+    :type cmdline_args: Namespace
+    :param cmdline_args: Command line args returned by ArgumentParser
+    """
+
+    def __init__(self, cmdline_args: "Namespace") -> None:  # noqa: F821
+
+        super().__init__(cmdline_args)
+
+        self._usernames = cmdline_args.users
+
+    def extract_data(self, api_service: TwitterAPIService) -> Users:
+        """Extract data for multiple users
+
+        Raises MissingUsernameParameter if username(-u) parameter
+        is not passed as argument. Raises UserNotFoundError if API
+        call returns None for the given username.
+
+        :type api_service: TwitterAPIService
+        :param api_service: Twitter API client
+        :rtype: Generator
+        :returns: List of users data
+        """
+
+        if not self._usernames:
+            raise MissingUsernameParameterError("Please give usernames parameter(-ul)!")
+
+        logger.info(f"Getting data for users...")
+
+        self._usernames = [username.strip() for username in self._usernames.split(",")]
+
+        for user_data in api_service.get_users(
+            self._usernames,
+            user_fields=self._user_fields,
+            expansions=self._expansions,
+            user_auth=self._is_authorized_user,
+        ):
+            user = User(user_data)
+
+            logger.debug(f"User data: {user}")
+
+            yield user

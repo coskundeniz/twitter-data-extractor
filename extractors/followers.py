@@ -24,10 +24,6 @@ class FollowersExtractor(UserExtractor):
     def extract_data(self, api_service: TwitterAPIService) -> Followers:
         """Extract all followers of the given user
 
-        Raises MissingUsernameParameter if username(-u) parameter
-        is not passed as argument. Raises UserNotFoundError if API
-        call returns None for the given username.
-
         :type api_service: TwitterAPIService
         :param api_service: Twitter API client
         :rtype: Generator

@@ -36,6 +36,7 @@ logger.addHandler(file_handler)
 class ExtractedDataType(Enum):
 
     USER = auto()
+    USERS = auto()
     FRIENDS = auto()
     FOLLOWERS = auto()
     TWEETS = auto()
@@ -59,12 +60,21 @@ def get_configuration(filename: str = "config.json") -> dict:
     return config
 
 
-def get_extracted_data_type(args) -> ExtractedDataType:
+def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
+    """Determine extracted data type from arguments
+
+    :type args: Namespace
+    :pram args: Command line args returned by ArgumentParser
+    :rtype: ExtractedDataType
+    :returns: Enum value for the extracted data type
+    """
 
     result = None
 
     if args.user and not (args.friends or args.followers):
         result = ExtractedDataType.USER
+    elif args.users:
+        result = ExtractedDataType.USERS
     elif args.user and args.friends:
         result = ExtractedDataType.FRIENDS
     elif args.user and args.followers:
