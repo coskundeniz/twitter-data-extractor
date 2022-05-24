@@ -43,7 +43,9 @@ def get_arg_parser() -> ArgumentParser:
         help="Determine API user(accounut owner or on behalf of a user)",
     )
     arg_parser.add_argument("-u", "--user", help="Extract user data for the given username")
-    arg_parser.add_argument("-ul", "--users", help="Extract user data for the given usernames")
+    arg_parser.add_argument(
+        "-ul", "--users", help="Extract user data for the given comma separated usernames"
+    )
     arg_parser.add_argument(
         "-fr", "--friends", action="store_true", help="Extract friends data for the given username"
     )
@@ -82,10 +84,7 @@ def main(args) -> None:
 
     try:
         extracted_data = extractor.extract_data(api_service)
-    except (
-        MissingUsernameParameterError,
-        UserNotFoundError,
-    ) as exp:
+    except (MissingUsernameParameterError, UserNotFoundError) as exp:
         handle_exception(exp)
 
     try:
@@ -93,15 +92,10 @@ def main(args) -> None:
     except UnsupportedOutputFileError as exp:
         handle_exception(exp)
 
-    reporter.save(extracted_data)
-
-    # if isinstance(extracted_data, Generator):
-
-    #     try:
-    #         for user_data in extracted_data:
-    #             print(user_data)
-    #     except PrivateAccountError as exp: # where to handle this ???
-    #         handle_exception(exp)
+    try:
+        reporter.save(extracted_data)
+    except PrivateAccountError as exp:
+        handle_exception(exp)
 
 
 if __name__ == "__main__":

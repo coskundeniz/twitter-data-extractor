@@ -87,6 +87,8 @@ class TwitterAPIService:
         https://docs.tweepy.org/en/latest/client.html#user-fields
         https://docs.tweepy.org/en/latest/client.html#expansions
 
+        Pinned tweets are not queried for multiple users.
+
         :type usernames: list
         :param usernames: Twitter usernames
         :type user_fields: list
@@ -106,7 +108,11 @@ class TwitterAPIService:
             user_auth=user_auth,
         )
 
-        users_data, users_includes = response.data, response.includes["tweets"]
+        if expansions:
+            users_data, users_includes = response.data, response.includes["tweets"]
+        else:
+            users_data = response.data
+            users_includes = []
 
         user_include_pairs = []
 
