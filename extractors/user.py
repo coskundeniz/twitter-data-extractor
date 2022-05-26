@@ -99,13 +99,13 @@ class UsersExtractor(UserExtractor):
         if not self._usernames:
             raise MissingUsernameParameterError("Please give usernames parameter(-ul)!")
 
-        logger.info(f"Getting data for users...")
-
         # remove pinned tweet query to prevent protected accounts to fail
         self._user_fields.remove("pinned_tweet_id")
         self._expansions = None
 
         self._usernames = [username.strip() for username in self._usernames.split(",")]
+
+        logger.info(f"Getting data for users: {self._usernames}")
 
         for user_data in api_service.get_users(
             self._usernames,

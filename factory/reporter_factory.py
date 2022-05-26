@@ -1,6 +1,7 @@
 from exceptions import UnsupportedOutputFileError
 from reporters import file_reporter
 from reporters.csv_reporter import CsvReporter
+from reporters.excel_reporter import ExcelReporter
 from utils import get_configuration, get_extracted_data_type
 
 
@@ -34,7 +35,8 @@ class ReporterFactory:
 
         if output_type == "csv":
             reporter = CsvReporter(output_file, extracted_data_type)
-
+        elif output_type == "xlsx":
+            reporter = ExcelReporter(output_file, extracted_data_type)
         else:
             message = (
                 "Unsupported output file! Should be one of csv, excel, gsheets, mongodb or sqlite"

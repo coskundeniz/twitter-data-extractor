@@ -11,6 +11,8 @@ class CsvReporter(FileReporter):
 
     :type filename: str
     :param filename: Name of the output file
+    :type extracted_data_type: ExtractedDataType
+    :param extracted_data_type: Enum value for the extracted data type
     """
 
     def __init__(self, filename: str, extracted_data_type: ExtractedDataType) -> None:
@@ -34,7 +36,7 @@ class CsvReporter(FileReporter):
             writer = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
             writer.writerow(self._user_data_header)
-            writer.writerow(CsvReporter._get_user_row_data(data))
+            writer.writerow(FileReporter._get_user_row_data(data))
 
     def _save_users_data(self, extracted_data: list[User]) -> None:
         """Save usersfriends/followers data
@@ -66,30 +68,3 @@ class CsvReporter(FileReporter):
         """
 
         pass
-
-    @staticmethod
-    def _get_user_row_data(data: dict) -> list:
-        """Get user data for the row
-
-        :type data: dict
-        :param data: Data dictionary for the User
-        """
-
-        return [
-            data["id"],
-            data["username"],
-            data["name"],
-            data["created_at"],
-            data["description"],
-            " ".join(url for url in data["entities"]["url_items"]),
-            " ".join(hashtag for hashtag in data["entities"]["hashtag_items"]),
-            " ".join(mention for mention in data["entities"]["mention_items"]),
-            data["location"],
-            data["pinned_tweet_id"],
-            data["pinned_tweet_text"],
-            data["profile_image_url"],
-            data["protected"],
-            data["public_metrics"],
-            data["url"],
-            data["verified"],
-        ]
