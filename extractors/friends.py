@@ -1,6 +1,5 @@
 from typing import Generator
 
-from exceptions import PrivateAccountError
 from extractors.user import UserExtractor
 from twitter_api_service import TwitterAPIService
 from models.user import User

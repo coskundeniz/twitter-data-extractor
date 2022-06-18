@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-from typing import Generator
 
 from exceptions import (
     UnsupportedExtractorError,
@@ -55,15 +54,27 @@ def get_arg_parser() -> ArgumentParser:
         action="store_true",
         help="Extract followers data for the given username",
     )
-    # ... more extractors here
+    arg_parser.add_argument(
+        "-ut",
+        "--user_tweets",
+        action="store_true",
+        help="Extract tweets of user with the given username",
+    )
+    arg_parser.add_argument(
+        "-e",
+        "--excludes",
+        default="retweets",
+        help="Fields to exclude from tweets queried as comma separated values (replies,retweets)",
+    )
     arg_parser.add_argument(
         "-ot",
         "--output_type",
-        # default="csv",
-        default="xlsx",
+        default="csv",
+        # default="xlsx",
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
-    arg_parser.add_argument("-of", "--output_file", default="results.xlsx", help="Output file name")
+    # arg_parser.add_argument("-of", "--output_file", default="results.xlsx", help="Output file name")
+    arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
 
     return arg_parser
 

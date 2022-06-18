@@ -71,7 +71,7 @@ def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
 
     result = None
 
-    if args.user and not (args.friends or args.followers):
+    if args.user and not (args.friends or args.followers or args.user_tweets):
         result = ExtractedDataType.USER
     elif args.users:
         result = ExtractedDataType.USERS
@@ -79,7 +79,9 @@ def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
         result = ExtractedDataType.FRIENDS
     elif args.user and args.followers:
         result = ExtractedDataType.FOLLOWERS
+    elif args.user and args.user_tweets:
+        result = ExtractedDataType.TWEETS
     else:
-        pass
+        logger.error("Invalid extracted data type!")
 
     return result

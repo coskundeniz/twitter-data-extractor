@@ -40,7 +40,7 @@ class ExcelReporter(FileReporter):
 
         data = extracted_data.data
 
-        self._add_header()
+        self._add_user_header()
 
         self._sheet.append(FileReporter._get_user_row_data(data))
 
@@ -49,7 +49,7 @@ class ExcelReporter(FileReporter):
         workbook.save(self._filename)
 
     def _save_users_data(self, extracted_data: list[User]) -> None:
-        """Save usersfriends/followers data
+        """Save users/friends/followers data
 
         :type extracted_data: list
         :param extracted_data: List of Users(users/friends/followers)
@@ -65,7 +65,7 @@ class ExcelReporter(FileReporter):
         workbook = self._create_workbook()
         self._sheet = workbook.active
 
-        self._add_header()
+        self._add_user_header()
 
         for user_data_item in extracted_data:
             self._sheet.append(FileReporter._get_user_row_data(user_data_item.data))
@@ -81,7 +81,19 @@ class ExcelReporter(FileReporter):
         :param extracted_data: List of Tweets
         """
 
-        pass
+        logger.debug("Saving tweets data...")
+
+        workbook = self._create_workbook()
+        self._sheet = workbook.active
+
+        self._add_tweet_header()
+
+        for tweet_data_item in extracted_data:
+            self._sheet.append(FileReporter._get_tweet_row_data(tweet_data_item.data))
+
+        self._adjust_column_widths()
+
+        workbook.save(self._filename)
 
     def _create_workbook(self) -> openpyxl.Workbook:
         """Create workbook
@@ -96,10 +108,18 @@ class ExcelReporter(FileReporter):
 
         return workbook
 
-    def _add_header(self) -> None:
-        """Add header"""
+    def _add_user_header(self) -> None:
+        """Add user data header"""
 
         for i, value in enumerate(self._user_data_header, start=1):
+            cell = self._sheet.cell(row=1, column=i)
+            cell.value = value
+            cell.font = Font(bold=True)
+
+    def _add_tweet_header(self) -> None:
+        """Add tweet data header"""
+
+        for i, value in enumerate(self._tweet_data_header, start=1):
             cell = self._sheet.cell(row=1, column=i)
             cell.value = value
             cell.font = Font(bold=True)

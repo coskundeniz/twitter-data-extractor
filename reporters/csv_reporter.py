@@ -1,9 +1,15 @@
 import csv
+from typing import Generator, Union
 
 from models.user import User
 from models.tweet import Tweet
 from reporters.file_reporter import FileReporter
 from utils import logger, ExtractedDataType
+
+
+Friends = Generator[User, None, None]
+Followers = Generator[User, None, None]
+Tweets = Generator[Tweet, None, None]
 
 
 class CsvReporter(FileReporter):
@@ -38,10 +44,12 @@ class CsvReporter(FileReporter):
             writer.writerow(self._user_data_header)
             writer.writerow(FileReporter._get_user_row_data(data))
 
-    def _save_users_data(self, extracted_data: list[User]) -> None:
-        """Save usersfriends/followers data
+    def _save_users_data(
+        self, extracted_data: Union[list[User], Union[Friends, Followers]]
+    ) -> None:
+        """Save users/friends/followers data
 
-        :type extracted_data: list
+        :type extracted_data: Generator
         :param extracted_data: List of Users(users/friends/followers)
         """
 
@@ -60,11 +68,19 @@ class CsvReporter(FileReporter):
             for user_data_item in extracted_data:
                 writer.writerow(CsvReporter._get_user_row_data(user_data_item.data))
 
-    def _save_tweets_data(self, extracted_data: list[Tweet]) -> None:
+    def _save_tweets_data(self, extracted_data: Tweets) -> None:
         """Save tweets data
 
-        :type extracted_data: list
+        :type extracted_data: Generator
         :param extracted_data: List of Tweets
         """
 
-        pass
+        logger.debug("Saving tweets data...")
+
+        with open(self._filename, "w", newline="") as csvfile:
+            writer = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+            writer.writerow(self._tweet_data_header)
+
+            for tweet_data_item in extracted_data:
+                writer.writerow(CsvReporter._get_tweet_row_data(tweet_data_item.data))

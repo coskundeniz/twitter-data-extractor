@@ -10,6 +10,7 @@ from utils import logger
 
 FriendGenerator = Generator[tuple[tweepy.user.User, tweepy.tweet.Tweet], None, None]
 FollowerGenerator = Generator[tuple[tweepy.user.User, tweepy.tweet.Tweet], None, None]
+TweetGenerator = Generator[tuple[tweepy.tweet.Tweet, dict], None, None]
 
 
 class TwitterAPIService:
@@ -236,6 +237,88 @@ class TwitterAPIService:
 
             for follower_data in user_include_pairs:
                 yield follower_data
+
+    def get_user_tweets(
+        self,
+        username: str,
+        tweet_fields: Optional[list[str]] = None,
+        place_fields: Optional[list[str]] = None,
+        media_fields: Optional[list[str]] = None,
+        expansions: Optional[str] = None,
+        exclude: Optional[list[str]] = None,
+        max_results: Optional[int] = 100,
+        user_auth: Optional[bool] = False,
+    ) -> TweetGenerator:
+        """Get tweets for the given username
+
+        :type username: str
+        :param username: Twitter username
+        :type tweet_fields: list
+        :param tweet_fields: Additional tweet fields to get
+        :type place_fields: list
+        :param place_fields: Additional place fields to get
+        :type media_fields: list
+        :param media_fields: Additional media fields to get
+        :type expansions: list
+        :param expansions: Additional data objects to get
+        :type exclude: list
+        :param exclude: List of fields to exclude (replies,retweets)
+        :type max_results: int
+        :param max_results: Number of maximum results to get for a page
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
+        :rtype: Generator
+        :returns: List of tweet data and includes objects as tuple
+        """
+
+        if self._is_account_protected(username):
+            raise PrivateAccountError("Could not extract data from private account!")
+
+        user = self.get_user(username)[0]
+
+        for response in tweepy.Paginator(
+            self._current_client.get_users_tweets,
+            user.id,
+            tweet_fields=tweet_fields,
+            place_fields=place_fields,
+            media_fields=media_fields,
+            expansions=expansions,
+            exclude=exclude,
+            max_results=max_results,
+            user_auth=user_auth,
+        ):
+            tweets_data, tweets_includes = response.data, response.includes
+
+            tweet_include_pairs = []
+
+            if tweets_data:
+                for tweet_data in tweets_data:
+                    includes = {}
+                    if tweet_data.attachments and "media_keys" in tweet_data.attachments:
+                        media_keys = tweet_data.attachments["media_keys"]
+
+                        if "media" in tweets_includes:
+                            includes["media"] = []
+
+                            for media_item in tweets_includes["media"]:
+                                if media_item.media_key in media_keys:
+                                    includes["media"].append(media_item)
+
+                    if tweet_data.geo and "places" in tweets_includes:
+                        includes["places"] = []
+                        place_id = tweet_data.geo["place_id"]
+
+                        for place_item in tweets_includes["places"]:
+                            if place_id == place_item.id:
+                                includes["places"].append(place_item)
+
+                    if includes:
+                        tweet_include_pairs.append((tweet_data, includes))
+                    else:
+                        tweet_include_pairs.append((tweet_data, None))
+
+                for tweet_data in tweet_include_pairs:
+                    yield tweet_data
 
     def _is_account_protected(self, username: str) -> bool:
         """Check if account is protected

@@ -24,7 +24,9 @@ Twitter Data Extractor
 
 -------------
 
-## Columns for file reporters
+### Columns for file reporters
+
+* User data columns
 
 ```
 [
@@ -46,3 +48,55 @@ Twitter Data Extractor
     "Verified",
 ]
 ```
+
+* Tweet data columns
+
+```
+[
+    "ID",
+    "Text",
+    "Created At",
+    "Source",
+    "Language",
+    "Public Metrics",
+    "URLs",
+    "Hashtags",
+    "Mentions",
+    "Media",
+    "Place",
+]
+```
+
+## User Tweet data to extract
+
+* Default
+    * id
+    * text
+
+* Additional
+    * author_id (for search tweets)
+    * attachments
+    * created_at
+    * entities (hashtags, urls, user mentions)
+    * geo
+    * lang
+    * public_metrics (reply, retweet, like, quote counts)
+    * source
+
+* media_fields
+    * url
+    * duration_ms
+    * width
+    * height
+    * public_metrics
+
+* place_fields
+    * country
+    * country_code
+    * geo
+    * place_type
+
+* expansions=geo.place_id,attachments.media_keys
+
+* exclude="retweets"
+
