@@ -6,6 +6,7 @@ from extractors.user import UserExtractor, UsersExtractor
 from extractors.friends import FriendsExtractor
 from extractors.followers import FollowersExtractor
 from extractors.user_tweets import UserTweetsExtractor
+from extractors.search_tweets import SearchTweetsExtractor
 from exceptions import UnsupportedExtractorError
 
 
@@ -41,6 +42,8 @@ class ExtractorFactory:
             extractor = FollowersExtractor(cmdline_args)
         elif cmdline_args.user and cmdline_args.user_tweets:
             extractor = UserTweetsExtractor(cmdline_args)
+        elif cmdline_args.search:
+            extractor = SearchTweetsExtractor(cmdline_args)
         else:
             raise UnsupportedExtractorError("Unsupported extractor! Check your parameters.")
 

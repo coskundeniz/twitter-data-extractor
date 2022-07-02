@@ -244,7 +244,7 @@ class TwitterAPIService:
         tweet_fields: Optional[list[str]] = None,
         place_fields: Optional[list[str]] = None,
         media_fields: Optional[list[str]] = None,
-        expansions: Optional[str] = None,
+        expansions: Optional[list[str]] = None,
         exclude: Optional[list[str]] = None,
         max_results: Optional[int] = 100,
         user_auth: Optional[bool] = False,
@@ -319,6 +319,66 @@ class TwitterAPIService:
 
                 for tweet_data in tweet_include_pairs:
                     yield tweet_data
+
+    def get_search_tweets(
+        self,
+        search_keyword: str,
+        tweet_fields: Optional[list[str]] = None,
+        place_fields: Optional[list[str]] = None,
+        media_fields: Optional[list[str]] = None,
+        expansions: Optional[list[str]] = None,
+        max_results: Optional[int] = 100,
+        user_auth: Optional[bool] = False,
+    ) -> TweetGenerator:
+        """Extract latest tweets for the given search keyword
+
+        :type search_keyword: str
+        :param search_keyword: Keyword to search
+        ...
+        :rtype: Generator
+        :returns: List of tweet data and includes objects as tuple
+        """
+
+        tweet_fields.append("author_id")
+        expansions.append("author_id")
+
+        user_fields = [
+            "created_at",
+            "description",
+            "entities",
+            "location",
+            "profile_image_url",
+            "protected",
+            "public_metrics",
+            "url",
+            "verified",
+        ]
+
+        # query = f"{search_keyword} -is:retweet -is:nullcast"
+        query = f"{search_keyword} -is:retweet"
+
+        for response in tweepy.Paginator(
+            self._current_client.search_recent_tweets,
+            query,
+            tweet_fields=tweet_fields,
+            user_fields=user_fields,
+            place_fields=place_fields,
+            media_fields=media_fields,
+            expansions=expansions,
+            max_results=max_results,
+            user_auth=user_auth,
+        ):
+            tweets_data, tweets_includes = response.data, response.includes
+
+            tweet_include_pairs = []
+
+            for tweet_data in tweets_data:
+                print(f"{tweet_data.text}\n")
+
+            # You can obtain the expanded object in includes.users
+            # by adding expansions=author_id in the request's query parameter.
+
+        raise SystemExit()
 
     def _is_account_protected(self, username: str) -> bool:
         """Check if account is protected

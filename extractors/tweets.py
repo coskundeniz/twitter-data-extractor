@@ -18,7 +18,7 @@ class TweetsExtractor(BaseExtractor):
 
     def __init__(self, cmdline_args: "Namespace") -> None:  # noqa: F821
 
-        self._username = cmdline_args.user
+        self._username = cmdline_args.user if cmdline_args.user else None
         self._is_authorized_user = not cmdline_args.forme
         self._tweet_fields = [
             "attachments",
@@ -33,6 +33,7 @@ class TweetsExtractor(BaseExtractor):
         self._media_fields = ["url", "duration_ms", "width", "height", "public_metrics"]
         self._expansions = ["geo.place_id", "attachments.media_keys"]
         self._exclude = cmdline_args.excludes.split(",")
+        self._search_keyword = cmdline_args.search if cmdline_args.search else None
 
     @abstractmethod
     def extract_data(self, api_service: TwitterAPIService) -> Tweets:

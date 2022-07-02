@@ -61,6 +61,11 @@ def get_arg_parser() -> ArgumentParser:
         help="Extract tweets of user with the given username",
     )
     arg_parser.add_argument(
+        "-s",
+        "--search",
+        help="Extract latest tweets for the given search keyword",
+    )
+    arg_parser.add_argument(
         "-e",
         "--excludes",
         default="retweets",
