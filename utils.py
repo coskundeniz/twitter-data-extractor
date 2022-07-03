@@ -81,6 +81,8 @@ def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
         result = ExtractedDataType.FOLLOWERS
     elif args.user and args.user_tweets:
         result = ExtractedDataType.TWEETS
+    elif args.search:
+        result = ExtractedDataType.TWEETS
     else:
         logger.error("Invalid extracted data type!")
 

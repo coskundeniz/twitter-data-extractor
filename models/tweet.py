@@ -1,6 +1,8 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 
+from models.user import User
+
 
 @dataclass
 class Tweet:
@@ -53,6 +55,9 @@ class Tweet:
                 for place_item in self._includes["places"]:
                     self.data["places"].append(place_item)
 
+            if "author" in self._includes:
+                self.data["author"] = self._includes["author"]
+
     def __str__(self) -> str:
 
         tweet_data_format = f"ID: {self.data['id']}\n"
@@ -96,5 +101,9 @@ class Tweet:
             tweet_data_format += (
                 f"\t\tType: {place['place_type']}, Coords: {place['geo']['bbox']}\n"
             )
+
+        if "author" in self.data:
+            user_data = User((self.data["author"], None))
+            tweet_data_format += f"\tAuthor: {user_data}\n"
 
         return tweet_data_format

@@ -26,10 +26,7 @@ class SearchTweetsExtractor(TweetsExtractor):
         The recent search endpoint returns Tweets from the last seven days
         that match a search query.
 
-        When "exclude=retweets" is used, the maximum historical Tweets returned
-        is still 3200. When the "exclude=replies" parameter is used for any value,
-        only the most recent 800 Tweets are available.
-
+        Retweets will be excluded.
 
         :type api_service: TwitterAPIService
         :param api_service: Twitter API client
@@ -38,6 +35,8 @@ class SearchTweetsExtractor(TweetsExtractor):
         """
 
         logger.info(f"Getting tweets for keyword={self._search_keyword}")
+
+        test_counter = 0
 
         for tweet_data in api_service.get_search_tweets(
             self._search_keyword,
@@ -51,5 +50,10 @@ class SearchTweetsExtractor(TweetsExtractor):
             tweet = Tweet(tweet_data)
 
             logger.debug(f"Search tweet data: {tweet}")
+
+            test_counter += 1
+
+            if test_counter > 20:
+                raise SystemExit()
 
             yield tweet

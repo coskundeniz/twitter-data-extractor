@@ -334,7 +334,18 @@ class TwitterAPIService:
 
         :type search_keyword: str
         :param search_keyword: Keyword to search
-        ...
+        :type tweet_fields: list
+        :param tweet_fields: Additional tweet fields to get
+        :type place_fields: list
+        :param place_fields: Additional place fields to get
+        :type media_fields: list
+        :param media_fields: Additional media fields to get
+        :type expansions: list
+        :param expansions: Additional data objects to get
+        :type max_results: int
+        :param max_results: Number of maximum results to get for a page
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
         :rtype: Generator
         :returns: List of tweet data and includes objects as tuple
         """
@@ -354,7 +365,6 @@ class TwitterAPIService:
             "verified",
         ]
 
-        # query = f"{search_keyword} -is:retweet -is:nullcast"
         query = f"{search_keyword} -is:retweet"
 
         for response in tweepy.Paginator(
@@ -373,12 +383,40 @@ class TwitterAPIService:
             tweet_include_pairs = []
 
             for tweet_data in tweets_data:
-                print(f"{tweet_data.text}\n")
+                includes = {}
 
-            # You can obtain the expanded object in includes.users
-            # by adding expansions=author_id in the request's query parameter.
+                if tweet_data.attachments and "media_keys" in tweet_data.attachments:
+                    media_keys = tweet_data.attachments["media_keys"]
 
-        raise SystemExit()
+                    if "media" in tweets_includes:
+                        includes["media"] = []
+
+                        for media_item in tweets_includes["media"]:
+                            if media_item.media_key in media_keys:
+                                includes["media"].append(media_item)
+
+                if tweet_data.geo and "places" in tweets_includes:
+                    includes["places"] = []
+                    place_id = tweet_data.geo["place_id"]
+
+                    for place_item in tweets_includes["places"]:
+                        if place_id == place_item.id:
+                            includes["places"].append(place_item)
+
+                if tweet_data.author_id and "users" in tweets_includes:
+                    author_id = tweet_data.author_id
+
+                    for user in tweets_includes["users"]:
+                        if author_id == user.id:
+                            includes["author"] = user
+
+                if includes:
+                    tweet_include_pairs.append((tweet_data, includes))
+                else:
+                    tweet_include_pairs.append((tweet_data, None))
+
+            for tweet_data in tweet_include_pairs:
+                yield tweet_data
 
     def _is_account_protected(self, username: str) -> bool:
         """Check if account is protected
