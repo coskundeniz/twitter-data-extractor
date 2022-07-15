@@ -39,7 +39,8 @@ class ExtractedDataType(Enum):
     USERS = auto()
     FRIENDS = auto()
     FOLLOWERS = auto()
-    TWEETS = auto()
+    USER_TWEETS = auto()
+    SEARCH_TWEETS = auto()
 
 
 def get_configuration(filename: str = "config.json") -> dict:
@@ -80,9 +81,9 @@ def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
     elif args.user and args.followers:
         result = ExtractedDataType.FOLLOWERS
     elif args.user and args.user_tweets:
-        result = ExtractedDataType.TWEETS
+        result = ExtractedDataType.USER_TWEETS
     elif args.search:
-        result = ExtractedDataType.TWEETS
+        result = ExtractedDataType.SEARCH_TWEETS
     else:
         logger.error("Invalid extracted data type!")
 

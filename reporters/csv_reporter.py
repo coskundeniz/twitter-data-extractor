@@ -77,6 +77,9 @@ class CsvReporter(FileReporter):
 
         logger.debug("Saving tweets data...")
 
+        if self._extracted_data_type == ExtractedDataType.USER_TWEETS:
+            self._tweet_data_header.remove("Author")
+
         with open(self._filename, "w", newline="") as csvfile:
             writer = csv.writer(csvfile, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
 

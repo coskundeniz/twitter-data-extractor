@@ -49,6 +49,7 @@ class FileReporter(ABC):
             "Mentions",
             "Media",
             "Place",
+            "Author",
         ]
 
     def save(self, extracted_data: Union[Any, list[Any]]) -> None:
@@ -152,7 +153,7 @@ class FileReporter(ABC):
 
             return place_data
 
-        return [
+        result = [
             data["id"],
             data["text"],
             to_ISO8601(data["created_at"]),
@@ -165,3 +166,9 @@ class FileReporter(ABC):
             _prepare_media_output(),
             _prepare_place_output(),
         ]
+
+        if "author" in data:
+            author_data = User((data["author"], None))
+            result.append(author_data)
+
+        return result

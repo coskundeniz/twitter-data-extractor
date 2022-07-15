@@ -54,6 +54,6 @@ class SearchTweetsExtractor(TweetsExtractor):
             test_counter += 1
 
             if test_counter > 20:
-                raise SystemExit()
+                break
 
             yield tweet
