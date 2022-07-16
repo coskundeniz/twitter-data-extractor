@@ -66,6 +66,12 @@ def get_arg_parser() -> ArgumentParser:
         help="Extract latest tweets for the given search keyword",
     )
     arg_parser.add_argument(
+        "-tc",
+        "--tweet_count",
+        type=int,
+        help="Limit the number of tweets gathered",
+    )
+    arg_parser.add_argument(
         "-e",
         "--excludes",
         default="retweets",

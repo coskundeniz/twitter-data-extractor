@@ -34,6 +34,7 @@ class TweetsExtractor(BaseExtractor):
         self._expansions = ["geo.place_id", "attachments.media_keys"]
         self._exclude = cmdline_args.excludes.split(",")
         self._search_keyword = cmdline_args.search if cmdline_args.search else None
+        self._tweet_count = cmdline_args.tweet_count if cmdline_args.tweet_count else None
 
     @abstractmethod
     def extract_data(self, api_service: TwitterAPIService) -> Tweets:

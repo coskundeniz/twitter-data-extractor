@@ -27,6 +27,7 @@ class UserTweetsExtractor(TweetsExtractor):
         When "exclude=retweets" is used, the maximum historical Tweets returned
         is still 3200. When the "exclude=replies" parameter is used for any value,
         only the most recent 800 Tweets are available.
+        Tweet count can be limited with the --tweet_count(-tc) parameter.
 
         Raises MissingUsernameParameter if username(-u) parameter
         is not passed as argument.
@@ -42,6 +43,8 @@ class UserTweetsExtractor(TweetsExtractor):
 
         logger.info(f"Getting tweets for username={self._username}")
 
+        tweet_counter = 0
+
         for tweet_data in api_service.get_user_tweets(
             self._username,
             tweet_fields=self._tweet_fields,
@@ -55,5 +58,10 @@ class UserTweetsExtractor(TweetsExtractor):
             tweet = Tweet(tweet_data)
 
             logger.debug(f"User tweet data: {tweet}")
+
+            tweet_counter += 1
+
+            if self._tweet_count and tweet_counter > self._tweet_count:
+                break
 
             yield tweet

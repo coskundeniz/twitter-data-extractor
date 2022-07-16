@@ -25,6 +25,7 @@ class SearchTweetsExtractor(TweetsExtractor):
 
         The recent search endpoint returns Tweets from the last seven days
         that match a search query.
+        Tweet count can be limited with the --tweet_count(-tc) parameter.
 
         Retweets will be excluded.
 
@@ -36,7 +37,7 @@ class SearchTweetsExtractor(TweetsExtractor):
 
         logger.info(f"Getting tweets for keyword={self._search_keyword}")
 
-        test_counter = 0
+        tweet_counter = 0
 
         for tweet_data in api_service.get_search_tweets(
             self._search_keyword,
@@ -51,9 +52,9 @@ class SearchTweetsExtractor(TweetsExtractor):
 
             logger.debug(f"Search tweet data: {tweet}")
 
-            test_counter += 1
+            tweet_counter += 1
 
-            if test_counter > 20:
+            if self._tweet_count and tweet_counter > self._tweet_count:
                 break
 
             yield tweet
