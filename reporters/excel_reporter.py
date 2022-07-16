@@ -119,6 +119,9 @@ class ExcelReporter(FileReporter):
     def _add_tweet_header(self) -> None:
         """Add tweet data header"""
 
+        if self._extracted_data_type == ExtractedDataType.USER_TWEETS:
+            self._tweet_data_header.remove("Author")
+
         for i, value in enumerate(self._tweet_data_header, start=1):
             cell = self._sheet.cell(row=1, column=i)
             cell.value = value

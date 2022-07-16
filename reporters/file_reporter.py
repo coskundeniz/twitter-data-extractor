@@ -169,6 +169,6 @@ class FileReporter(ABC):
 
         if "author" in data:
             author_data = User((data["author"], None))
-            result.append(author_data)
+            result.append(str(author_data).strip())
 
         return result
