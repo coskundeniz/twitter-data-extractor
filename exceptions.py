@@ -20,3 +20,7 @@ class PrivateAccountError(TwitterDataExtractorException):
 
 class UnsupportedOutputFileError(TwitterDataExtractorException):
     """Unsupported output file type"""
+
+
+class MissingShareMailError(TwitterDataExtractorException):
+    """Missing share mail error"""

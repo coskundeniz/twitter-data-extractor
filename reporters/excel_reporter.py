@@ -38,11 +38,9 @@ class ExcelReporter(FileReporter):
 
         logger.info(extracted_data)
 
-        data = extracted_data.data
-
         self._add_user_header()
 
-        self._sheet.append(FileReporter._get_user_row_data(data))
+        self._sheet.append(FileReporter._get_user_row_data(extracted_data.data))
 
         self._adjust_column_widths()
 

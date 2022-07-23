@@ -7,6 +7,7 @@ from exceptions import (
     UserNotFoundError,
     PrivateAccountError,
     UnsupportedOutputFileError,
+    MissingShareMailError,
 )
 from factory.extractor_factory import ExtractorFactory
 from factory.reporter_factory import ReporterFactory
@@ -39,7 +40,7 @@ def get_arg_parser() -> ArgumentParser:
     arg_parser.add_argument(
         "--forme",
         action="store_true",
-        help="Determine API user(accounut owner or on behalf of a user)",
+        help="Determine API user(account owner or on behalf of a user)",
     )
     arg_parser.add_argument("-u", "--user", help="Extract user data for the given username")
     arg_parser.add_argument(
@@ -81,11 +82,16 @@ def get_arg_parser() -> ArgumentParser:
         "-ot",
         "--output_type",
         # default="csv",
-        default="xlsx",
+        default="gsheets",
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
-    arg_parser.add_argument("-of", "--output_file", default="results.xlsx", help="Output file name")
+    arg_parser.add_argument(
+        "-of", "--output_file", default="user_results_test", help="Output file name"
+    )
     # arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
+    arg_parser.add_argument(
+        "-sm", "--share_mail", help="Mail address to share Google Sheets document"
+    )
 
     return arg_parser
 
@@ -112,7 +118,7 @@ def main(args) -> None:
 
     try:
         reporter = ReporterFactory.get_reporter(args)
-    except UnsupportedOutputFileError as exp:
+    except (UnsupportedOutputFileError, MissingShareMailError) as exp:
         handle_exception(exp)
 
     try:
