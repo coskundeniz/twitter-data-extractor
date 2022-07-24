@@ -86,7 +86,7 @@ def get_arg_parser() -> ArgumentParser:
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
     arg_parser.add_argument(
-        "-of", "--output_file", default="user_results_test", help="Output file name"
+        "-of", "--output_file", default="search_tweet_results_test", help="Output file name"
     )
     # arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
     arg_parser.add_argument(

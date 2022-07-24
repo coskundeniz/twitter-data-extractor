@@ -1,3 +1,5 @@
+from time import sleep
+
 import gspread
 from gspread.spreadsheet import Spreadsheet
 from gspread.exceptions import SpreadsheetNotFound
@@ -78,27 +80,37 @@ class GSheetsReporter(FileReporter):
 
         self._add_user_header(worksheet)
 
-        # TODO: can be used for multiple data
-        # update_range = f"A1:P{len(self._user_data_header)+1}"
-
-        # worksheet.batch_update(
-        #     [
-        #         {
-        #             "range": update_range,
-        #             "values": values,
-        #         }
-        #     ]
-        # )
-
         for user_data_item in extracted_data:
             worksheet.append_row(FileReporter._get_user_row_data(user_data_item.data))
+            GSheetsReporter._wait_for_quota_limit()
 
         worksheet.columns_auto_resize(
             start_column_index=1, end_column_index=len(self._user_data_header)
         )
 
     def _save_tweets_data(self, extracted_data: list[Tweet]) -> None:
-        pass
+        """Save tweets data
+
+        :type extracted_data: list
+        :param extracted_data: List of Tweets
+        """
+
+        logger.debug("Saving tweets data...")
+
+        gsheet = self._get_sheet()
+
+        worksheet = gsheet.sheet1
+        worksheet.clear()
+
+        self._add_tweet_header(worksheet)
+
+        for tweet_data_item in extracted_data:
+            worksheet.append_row(FileReporter._get_tweet_row_data(tweet_data_item.data))
+            GSheetsReporter._wait_for_quota_limit()
+
+        worksheet.columns_auto_resize(
+            start_column_index=1, end_column_index=len(self._tweet_data_header)
+        )
 
     def _add_user_header(self, worksheet: gspread.worksheet.Worksheet) -> None:
         """Add user data header
@@ -109,6 +121,19 @@ class GSheetsReporter(FileReporter):
 
         worksheet.append_row(self._user_data_header)
         worksheet.format(f"A1:P1", {"textFormat": {"bold": True}})
+
+    def _add_tweet_header(self, worksheet: gspread.worksheet.Worksheet) -> None:
+        """Add tweet data header
+
+        :type worksheet: gspread.worksheet.Worksheet
+        :param worksheet: Worksheet instance
+        """
+
+        if self._extracted_data_type == ExtractedDataType.USER_TWEETS:
+            self._tweet_data_header.remove("Author")
+
+        worksheet.append_row(self._tweet_data_header)
+        worksheet.format(f"A1:L1", {"textFormat": {"bold": True}})
 
     def _get_sheet(self) -> Spreadsheet:
         """Create or open spreadsheet
@@ -134,3 +159,9 @@ class GSheetsReporter(FileReporter):
                 self._gsheet.share(self._share_mail, perm_type="user", role="writer")
 
         return self._gsheet
+
+    @staticmethod
+    def _wait_for_quota_limit():
+        """Sleep 1 second between write requests"""
+
+        sleep(1)
