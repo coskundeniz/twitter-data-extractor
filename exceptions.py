@@ -18,9 +18,13 @@ class PrivateAccountError(TwitterDataExtractorException):
     """Private account error"""
 
 
-class UnsupportedOutputFileError(TwitterDataExtractorException):
-    """Unsupported output file type"""
+class UnsupportedReporterError(TwitterDataExtractorException):
+    """Unsupported reporter error"""
 
 
 class MissingShareMailError(TwitterDataExtractorException):
     """Missing share mail error"""
+
+
+class ExtractorDatabaseError(TwitterDataExtractorException):
+    """Database operation error"""

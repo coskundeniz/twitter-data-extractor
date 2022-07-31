@@ -100,3 +100,17 @@ Twitter Data Extractor
 
 * exclude="retweets"
 
+## How to setup
+
+If you will use MongoDB to save users/tweets data, install it from [here](https://docs.mongodb.com/manual/administration/install-community/).
+
+You can check the running status after installation and start the database server with the following commands on Linux.
+
+* `sudo service mongod status`
+* `sudo service mongod start`
+
+Run one of the followings to install required packages
+
+* `pipenv install && pipenv shell`
+* `pip install -r requirements.txt`
+

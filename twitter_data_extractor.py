@@ -6,7 +6,8 @@ from exceptions import (
     MissingUsernameParameterError,
     UserNotFoundError,
     PrivateAccountError,
-    UnsupportedOutputFileError,
+    UnsupportedReporterError,
+    ExtractorDatabaseError,
     MissingShareMailError,
 )
 from factory.extractor_factory import ExtractorFactory
@@ -82,13 +83,13 @@ def get_arg_parser() -> ArgumentParser:
         "-ot",
         "--output_type",
         # default="csv",
-        default="gsheets",
+        default="mongodb",
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
-    arg_parser.add_argument(
-        "-of", "--output_file", default="search_tweet_results_test", help="Output file name"
-    )
-    # arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
+    # arg_parser.add_argument(
+    #     "-of", "--output_file", default="search_tweet_results_test", help="Output file name"
+    # )
+    arg_parser.add_argument("-of", "--output_file", default="results.xlsx", help="Output file name")
     arg_parser.add_argument(
         "-sm", "--share_mail", help="Mail address to share Google Sheets document"
     )
@@ -118,12 +119,12 @@ def main(args) -> None:
 
     try:
         reporter = ReporterFactory.get_reporter(args)
-    except (UnsupportedOutputFileError, MissingShareMailError) as exp:
+    except (UnsupportedReporterError, ExtractorDatabaseError, MissingShareMailError) as exp:
         handle_exception(exp)
 
     try:
         reporter.save(extracted_data)
-    except PrivateAccountError as exp:
+    except (PrivateAccountError, ExtractorDatabaseError) as exp:
         handle_exception(exp)
 
 

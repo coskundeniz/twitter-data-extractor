@@ -1,8 +1,12 @@
-from exceptions import UnsupportedOutputFileError
+from typing import Union
+
+from exceptions import UnsupportedReporterError
 from reporters import file_reporter
+from reporters import database_reporter
 from reporters.csv_reporter import CsvReporter
 from reporters.excel_reporter import ExcelReporter
 from reporters.gsheets_reporter import GSheetsReporter
+from reporters.mongodb_reporter import MongoDBReporter
 from utils import get_configuration, get_extracted_data_type
 
 
@@ -10,15 +14,17 @@ class ReporterFactory:
     """Factory class for url readers"""
 
     @staticmethod
-    def get_reporter(cmdline_args: "Namespace") -> file_reporter.FileReporter:  # noqa: F821
+    def get_reporter(
+        cmdline_args: "Namespace",
+    ) -> Union[file_reporter.FileReporter, database_reporter.DatabaseReporter]:  # noqa: F821
         """Get specific reporter
 
-        Raises UnsupportedOutputFileError if output format is not supported.
+        Raises UnsupportedReporterError if output format is not supported.
 
         :type cmdline_args: Namespace
         :param cmdline_args: Command line args returned by ArgumentParser
-        :rtype: file_reporter.FileReporter
-        :returns: Concrete FileReporter object
+        :rtype: file_reporter.FileReporter | database_reporter.DatabaseReporter
+        :returns: Concrete FileReporter or DatabaseReporter object
         """
 
         reporter = None
@@ -40,10 +46,12 @@ class ReporterFactory:
             reporter = ExcelReporter(output_file, extracted_data_type)
         elif output_type == "gsheets":
             reporter = GSheetsReporter(output_file, extracted_data_type, cmdline_args.share_mail)
+        elif output_type == "mongodb":
+            reporter = MongoDBReporter(extracted_data_type)
         else:
             message = (
                 "Unsupported output file! Should be one of csv, excel, gsheets, mongodb or sqlite"
             )
-            raise UnsupportedOutputFileError(message)
+            raise UnsupportedReporterError(message)
 
         return reporter
