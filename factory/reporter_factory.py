@@ -7,6 +7,7 @@ from reporters.csv_reporter import CsvReporter
 from reporters.excel_reporter import ExcelReporter
 from reporters.gsheets_reporter import GSheetsReporter
 from reporters.mongodb_reporter import MongoDBReporter
+from reporters.sqlite_reporter import SQLiteReporter
 from utils import get_configuration, get_extracted_data_type
 
 
@@ -48,6 +49,8 @@ class ReporterFactory:
             reporter = GSheetsReporter(output_file, extracted_data_type, cmdline_args.share_mail)
         elif output_type == "mongodb":
             reporter = MongoDBReporter(extracted_data_type)
+        elif output_type == "sqlite":
+            reporter = SQLiteReporter(extracted_data_type)
         else:
             message = (
                 "Unsupported output file! Should be one of csv, excel, gsheets, mongodb or sqlite"

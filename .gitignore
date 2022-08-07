@@ -135,4 +135,6 @@ dmypy.json
 
 *creds.json
 *credentials*
+
+*.db
 *.log.*

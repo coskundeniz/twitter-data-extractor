@@ -83,7 +83,7 @@ def get_arg_parser() -> ArgumentParser:
         "-ot",
         "--output_type",
         # default="csv",
-        default="mongodb",
+        default="sqlite",
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
     # arg_parser.add_argument(
