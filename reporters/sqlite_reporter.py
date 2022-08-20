@@ -32,7 +32,7 @@ class SQLiteReporter(DatabaseReporter):
         self._create_db_tables()
 
         # only used for logging
-        self._filename = "SQLite Database"
+        self._filename = "SQLite Database: "
 
     def _save_user_data(self, extracted_data: User) -> None:
         """Save single user data
@@ -43,7 +43,7 @@ class SQLiteReporter(DatabaseReporter):
 
         logger.info("Saving user data...")
 
-        self._filename += ": users.db"
+        self._filename += "users.db"
 
         logger.info(extracted_data)
 
@@ -55,6 +55,20 @@ class SQLiteReporter(DatabaseReporter):
         :type extracted_data: list
         :param extracted_data: List of Users(users/friends/followers)
         """
+
+        self._filename += "users.db"
+
+        is_friends_data = self._extracted_data_type == ExtractedDataType.FRIENDS
+
+        if self._extracted_data_type == ExtractedDataType.USERS:
+            logger.debug("Saving users data...")
+        else:
+            logger.debug(
+                f"Saving {'friends' if is_friends_data else 'followers'} data..."
+            )
+
+        for user_data_item in extracted_data:
+            self._save_one_user(user_data_item)
 
     def _save_one_user(self, extracted_data) -> None:
         """Save one user to database
@@ -68,23 +82,32 @@ class SQLiteReporter(DatabaseReporter):
 
         try:
             with self._users_db() as users_db_cursor:
+                user_id = extracted_data.data["id"]
+                name = extracted_data.data["name"]
+                username = extracted_data.data["username"]
+
                 users_db_cursor.execute(
-                    "SELECT user_id FROM users WHERE user_id=?", (extracted_data.data["id"],)
+                    "SELECT user_id FROM users WHERE user_id=?", (user_id,)
                 )
+
                 found = users_db_cursor.fetchone()
 
+                params = DatabaseReporter._get_user_row_data(extracted_data.data)
+
                 if not found:
-                    params = DatabaseReporter._get_user_row_data(extracted_data.data)
                     users_db_cursor.execute(
-                        f"INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params
+                        "INSERT INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        params,
                     )
+                    logger.info(f"User [{user_id}:{username}:{name}] added to database.")
+
                 else:
-                    user_id = extracted_data.data["id"]
-                    name = extracted_data.data["name"]
-                    username = extracted_data.data["username"]
                     logger.info(f"User [{user_id}:{username}:{name}] already exists. Updating...")
 
-                    # TODO: update user data on db
+                    users_db_cursor.execute(
+                        "REPLACE INTO users VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        params,
+                    )
 
         except sqlite3.Error as exp:
             raise ExtractorDatabaseError(exp) from exp
@@ -92,12 +115,74 @@ class SQLiteReporter(DatabaseReporter):
     def _save_tweets_data(self, extracted_data: list[Tweet]) -> None:
         """Save tweets data
 
-        Use user_tweets collection if extracted data type is user tweets,
-        search_tweets collection otherwise.
+        Use user_tweets table if extracted data type is user tweets,
+        search_tweets table otherwise.
+
+        Raises ExtractorDatabaseError if an error occurs
+        during the save operation.
 
         :type extracted_data: list
         :param extracted_data: List of Tweets
         """
+
+        logger.debug("Saving tweets data...")
+
+        if self._extracted_data_type == ExtractedDataType.USER_TWEETS:
+            tweets_db = self._user_tweets_db
+            self._filename += "user_tweets.db"
+            table = "user_tweets"
+        elif self._extracted_data_type == ExtractedDataType.SEARCH_TWEETS:
+            tweets_db = self._search_tweets_db
+            self._filename += "search_tweets.db"
+            table = "search_tweets"
+
+        try:
+            with tweets_db() as tweets_db_cursor:
+
+                for tweet_data_item in extracted_data:
+
+                    tweet_id = tweet_data_item.data["id"]
+
+                    tweets_db_cursor.execute(
+                        f"SELECT tweet_id FROM {table} WHERE tweet_id=?", (tweet_id,)
+                    )
+
+                    found = tweets_db_cursor.fetchone()
+
+                    params = DatabaseReporter._get_tweet_row_data(tweet_data_item.data)
+
+                    if not found:
+
+                        if table == "user_tweets":
+                            tweets_db_cursor.execute(
+                                f"INSERT INTO {table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                params,
+                            )
+                        else:
+                            # there is one more field(author) for search tweets
+                            tweets_db_cursor.execute(
+                                f"INSERT INTO {table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                params,
+                            )
+
+                        logger.info(f"Tweet[{tweet_id}] added to database.")
+
+                    else:
+                        logger.info(f"Tweet[{tweet_id}] already exists. Updating...")
+
+                        if table == "user_tweets":
+                            tweets_db_cursor.execute(
+                                f"REPLACE INTO {table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                params,
+                            )
+                        else:
+                            tweets_db_cursor.execute(
+                                f"REPLACE INTO {table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                params,
+                            )
+
+        except sqlite3.Error as exp:
+            raise ExtractorDatabaseError(exp) from exp
 
     def _create_db_tables(self) -> None:
         """Create tables for users, user tweets and search tweets databases"""
@@ -124,25 +209,40 @@ class SQLiteReporter(DatabaseReporter):
                 );"""
             )
 
-        # with self._user_tweets_db() as user_tweets_db_cursor:
-        #     user_tweets_db_cursor.execute(
-        #         """CREATE TABLE IF NOT EXISTS entries (
-        #             id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             entry_id TEXT NOT NULL,
-        #             title TEXT NOT NULL,
-        #             content TEXT NOT NULL
-        #         );"""
-        #     )
+        with self._user_tweets_db() as user_tweets_db_cursor:
+            user_tweets_db_cursor.execute(
+                """CREATE TABLE IF NOT EXISTS user_tweets (
+                    tweet_id TEXT PRIMARY KEY NOT NULL,
+                    text TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    language TEXT NOT NULL,
+                    public_metrics TEXT NOT NULL,
+                    urls TEXT,
+                    hashtags TEXT,
+                    mentions TEXT,
+                    media TEXT,
+                    places TEXT
+                );"""
+            )
 
-        # with self._search_tweets_db() as search_tweets_db_cursor:
-        #     search_tweets_db_cursor.execute(
-        #         """CREATE TABLE IF NOT EXISTS entries (
-        #             id INTEGER PRIMARY KEY AUTOINCREMENT,
-        #             entry_id TEXT NOT NULL,
-        #             title TEXT NOT NULL,
-        #             content TEXT NOT NULL
-        #         );"""
-        #     )
+        with self._search_tweets_db() as search_tweets_db_cursor:
+            search_tweets_db_cursor.execute(
+                """CREATE TABLE IF NOT EXISTS search_tweets (
+                    tweet_id TEXT PRIMARY KEY NOT NULL,
+                    text TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    source TEXT NOT NULL,
+                    language TEXT NOT NULL,
+                    public_metrics TEXT NOT NULL,
+                    urls TEXT,
+                    hashtags TEXT,
+                    mentions TEXT,
+                    media TEXT,
+                    places TEXT,
+                    author TEXT
+                );"""
+            )
 
     @contextmanager
     def _users_db(self) -> DBCursor:
