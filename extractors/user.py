@@ -3,7 +3,7 @@ from typing import Generator
 from exceptions import MissingUsernameParameterError, UserNotFoundError
 from extractors.base_extractor import BaseExtractor
 from models.user import User
-from utils import logger
+from utils import logger, get_configuration
 from twitter_api_service import TwitterAPIService
 
 
@@ -19,7 +19,9 @@ class UserExtractor(BaseExtractor):
 
     def __init__(self, cmdline_args: "Namespace") -> None:  # noqa: F821
 
-        self._username = cmdline_args.user
+        self._config = get_configuration(cmdline_args.configfile)
+
+        self._username = self._config["user"] if cmdline_args.useconfig else cmdline_args.user
         self._is_authorized_user = not cmdline_args.forme
         self._user_fields = [
             "created_at",
@@ -81,7 +83,7 @@ class UsersExtractor(UserExtractor):
 
         super().__init__(cmdline_args)
 
-        self._usernames = cmdline_args.users
+        self._usernames = self._config["users"] if cmdline_args.useconfig else cmdline_args.users
 
     def extract_data(self, api_service: TwitterAPIService) -> Users:
         """Extract data for multiple users

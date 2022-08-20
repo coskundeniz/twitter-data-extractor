@@ -13,7 +13,7 @@ from exceptions import (
 from factory.extractor_factory import ExtractorFactory
 from factory.reporter_factory import ReporterFactory
 from twitter_api_service import TwitterAPIService
-from utils import logger, get_configuration
+from utils import logger
 
 
 __author__ = "Coşkun Deniz <codenineeight@gmail.com>"
@@ -38,6 +38,15 @@ def get_arg_parser() -> ArgumentParser:
     """
 
     arg_parser = ArgumentParser()
+    arg_parser.add_argument(
+        "-c", "--useconfig", action="store_true", help="Read configuration from config.json file"
+    )
+    arg_parser.add_argument(
+        "-cf",
+        "--configfile",
+        default="config.json",
+        help="Read configuration from given file",
+    )
     arg_parser.add_argument(
         "--forme",
         action="store_true",
@@ -82,14 +91,10 @@ def get_arg_parser() -> ArgumentParser:
     arg_parser.add_argument(
         "-ot",
         "--output_type",
-        # default="csv",
-        default="sqlite",
+        default="csv",
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
-    # arg_parser.add_argument(
-    #     "-of", "--output_file", default="search_tweet_results_test", help="Output file name"
-    # )
-    arg_parser.add_argument("-of", "--output_file", default="results.xlsx", help="Output file name")
+    arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
     arg_parser.add_argument(
         "-sm", "--share_mail", help="Mail address to share Google Sheets document"
     )

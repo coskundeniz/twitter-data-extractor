@@ -3,10 +3,10 @@ import logging
 from enum import Enum, auto
 from logging.handlers import RotatingFileHandler
 
-# from exceptions import UnsupportedConfigFileError
+from exceptions import UnsupportedConfigFileError
 
 
-LOG_FILENAME = "tw_extractor.log"
+LOG_FILENAME = "tw_data_extractor.log"
 
 # Create a custom logger
 logger = logging.getLogger(__name__)
@@ -49,11 +49,11 @@ def get_configuration(filename: str = "config.json") -> dict:
     :type filename: str
     :param filename: Name of the configuration file
     :rtype: dict
-    :returns: Configuration as dict
+    :returns: Configuration as dictionary
     """
 
-    # if not filename.endswith(".json"):
-    #     raise UnsupportedConfigFileError("Config file must be a json file!")
+    if not filename.endswith(".json"):
+        raise UnsupportedConfigFileError("Config file must be a json file!")
 
     with open(filename, encoding="utf-8") as configfile:
         config = json.load(configfile)
@@ -72,17 +72,42 @@ def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
 
     result = None
 
-    if args.user and not (args.friends or args.followers or args.user_tweets):
+    config = get_configuration(args.configfile)
+
+    if args.useconfig:
+        is_user_extractor = config["user"] and not (
+            args.friends or args.followers or args.user_tweets
+        )
+        is_users_extractor = config["users"] and not (
+            args.friends or args.followers or args.user_tweets
+        )
+        is_friends_extractor = config["user"] and args.friends
+        is_followers_extractor = config["user"] and args.followers
+        is_user_tweets_extractor = config["user"] and args.user_tweets
+        is_search_tweets_extractor = config["search"]
+    else:
+        is_user_extractor = args.user and not (
+            args.friends or args.followers or args.user_tweets
+        )
+        is_users_extractor = args.users and not (
+            args.friends or args.followers or args.user_tweets
+        )
+        is_friends_extractor = args.user and args.friends
+        is_followers_extractor = args.user and args.followers
+        is_user_tweets_extractor = args.user and args.user_tweets
+        is_search_tweets_extractor = args.search
+
+    if is_user_extractor:
         result = ExtractedDataType.USER
-    elif args.users:
+    elif is_users_extractor:
         result = ExtractedDataType.USERS
-    elif args.user and args.friends:
+    elif is_friends_extractor:
         result = ExtractedDataType.FRIENDS
-    elif args.user and args.followers:
+    elif is_followers_extractor:
         result = ExtractedDataType.FOLLOWERS
-    elif args.user and args.user_tweets:
+    elif is_user_tweets_extractor:
         result = ExtractedDataType.USER_TWEETS
-    elif args.search:
+    elif is_search_tweets_extractor:
         result = ExtractedDataType.SEARCH_TWEETS
     else:
         logger.error("Invalid extracted data type!")

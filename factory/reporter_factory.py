@@ -30,14 +30,14 @@ class ReporterFactory:
 
         reporter = None
 
-        # config = get_configuration(cmdline_args.configfile)
+        config = get_configuration(cmdline_args.configfile)
 
-        # if cmdline_args.useconfig:
-        #     output_type = config["output_type"]
-        #     output_file = config["output_file"]
-        # else:
-        output_type = cmdline_args.output_type
-        output_file = cmdline_args.output_file
+        if cmdline_args.useconfig:
+            output_type = config["output_type"]
+            output_file = config["output_file"]
+        else:
+            output_type = cmdline_args.output_type
+            output_file = cmdline_args.output_file
 
         extracted_data_type = get_extracted_data_type(cmdline_args)
 
@@ -46,7 +46,8 @@ class ReporterFactory:
         elif output_type == "xlsx":
             reporter = ExcelReporter(output_file, extracted_data_type)
         elif output_type == "gsheets":
-            reporter = GSheetsReporter(output_file, extracted_data_type, cmdline_args.share_mail)
+            share_mail = config["share_mail"] if cmdline_args.useconfig else cmdline_args.share_mail
+            reporter = GSheetsReporter(output_file, extracted_data_type, share_mail)
         elif output_type == "mongodb":
             reporter = MongoDBReporter(extracted_data_type)
         elif output_type == "sqlite":

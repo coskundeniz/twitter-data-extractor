@@ -1,0 +1,10 @@
+{
+    "user": "gvanrossum",
+    "users": "",
+    "search": "",
+    "excludes": "retweets",
+    "tweet_count": 20,
+    "output_type": "csv",
+    "output_file": "results.csv",
+    "share_mail": "codenineeight@gmail.com"
+}

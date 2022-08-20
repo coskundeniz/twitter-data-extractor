@@ -114,3 +114,10 @@ Run one of the followings to install required packages
 * `pipenv install && pipenv shell`
 * `pip install -r requirements.txt`
 
+---
+
+* If config will be used for getting parameters, boolean parameters like --forme, --friends still must be passed
+    as command-line option.
+
+* "user" and "users" field should be empty for "search" keyword to be used.
+

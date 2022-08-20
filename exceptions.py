@@ -18,6 +18,10 @@ class PrivateAccountError(TwitterDataExtractorException):
     """Private account error"""
 
 
+class UnsupportedConfigFileError(TwitterDataExtractorException):
+    """Unsupported config file error"""
+
+
 class UnsupportedReporterError(TwitterDataExtractorException):
     """Unsupported reporter error"""
 

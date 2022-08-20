@@ -8,6 +8,7 @@ from extractors.followers import FollowersExtractor
 from extractors.user_tweets import UserTweetsExtractor
 from extractors.search_tweets import SearchTweetsExtractor
 from exceptions import UnsupportedExtractorError
+from utils import get_configuration
 
 
 class ExtractorFactory:
@@ -30,19 +31,42 @@ class ExtractorFactory:
 
         extractor = None
 
-        if cmdline_args.user and not (
-            cmdline_args.friends or cmdline_args.followers or cmdline_args.user_tweets
-        ):
+        config = get_configuration(cmdline_args.configfile)
+
+        if cmdline_args.useconfig:
+            is_user_extractor = config["user"] and not (
+                cmdline_args.friends or cmdline_args.followers or cmdline_args.user_tweets
+            )
+            is_users_extractor = config["users"] and not (
+                cmdline_args.friends or cmdline_args.followers or cmdline_args.user_tweets
+            )
+            is_friends_extractor = config["user"] and cmdline_args.friends
+            is_followers_extractor = config["user"] and cmdline_args.followers
+            is_user_tweets_extractor = config["user"] and cmdline_args.user_tweets
+            is_search_tweets_extractor = config["search"]
+        else:
+            is_user_extractor = cmdline_args.user and not (
+                cmdline_args.friends or cmdline_args.followers or cmdline_args.user_tweets
+            )
+            is_users_extractor = cmdline_args.users and not (
+                cmdline_args.friends or cmdline_args.followers or cmdline_args.user_tweets
+            )
+            is_friends_extractor = cmdline_args.user and cmdline_args.friends
+            is_followers_extractor = cmdline_args.user and cmdline_args.followers
+            is_user_tweets_extractor = cmdline_args.user and cmdline_args.user_tweets
+            is_search_tweets_extractor = cmdline_args.search
+
+        if is_user_extractor:
             extractor = UserExtractor(cmdline_args)
-        elif cmdline_args.users:
+        elif is_users_extractor:
             extractor = UsersExtractor(cmdline_args)
-        elif cmdline_args.user and cmdline_args.friends:
+        elif is_friends_extractor:
             extractor = FriendsExtractor(cmdline_args)
-        elif cmdline_args.user and cmdline_args.followers:
+        elif is_followers_extractor:
             extractor = FollowersExtractor(cmdline_args)
-        elif cmdline_args.user and cmdline_args.user_tweets:
+        elif is_user_tweets_extractor:
             extractor = UserTweetsExtractor(cmdline_args)
-        elif cmdline_args.search:
+        elif is_search_tweets_extractor:
             extractor = SearchTweetsExtractor(cmdline_args)
         else:
             raise UnsupportedExtractorError("Unsupported extractor! Check your parameters.")
