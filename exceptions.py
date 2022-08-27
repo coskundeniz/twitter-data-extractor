@@ -2,6 +2,10 @@ class TwitterDataExtractorException(Exception):
     """Base exception for Twitter Data Extractor"""
 
 
+class TwitterAPISetupError(TwitterDataExtractorException):
+    """Setup error for Twitter API"""
+
+
 class MissingUsernameParameterError(TwitterDataExtractorException):
     """Missing username for user extractor"""
 

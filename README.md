@@ -64,6 +64,7 @@ Twitter Data Extractor
     "Mentions",
     "Media",
     "Place",
+    "Author" (for search tweets)
 ]
 ```
 
@@ -111,8 +112,8 @@ You can check the running status after installation and start the database serve
 
 Run one of the followings to install required packages
 
-* `pipenv install && pipenv shell`
 * `pip install -r requirements.txt`
+* `pipenv install && pipenv shell`
 
 ---
 

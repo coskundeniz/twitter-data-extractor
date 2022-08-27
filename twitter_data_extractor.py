@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 
 from exceptions import (
+    TwitterAPISetupError,
     UnsupportedExtractorError,
     TwitterDataExtractorException,
     MissingUsernameParameterError,
@@ -57,7 +58,10 @@ def get_arg_parser() -> ArgumentParser:
         "-ul", "--users", help="Extract user data for the given comma separated usernames"
     )
     arg_parser.add_argument(
-        "-fr", "--friends", action="store_true", help="Extract friends data for the given username"
+        "-fr",
+        "--friends",
+        action="store_true",
+        help="Extract friends data for the given username"
     )
     arg_parser.add_argument(
         "-fl",
@@ -91,10 +95,10 @@ def get_arg_parser() -> ArgumentParser:
     arg_parser.add_argument(
         "-ot",
         "--output_type",
-        default="csv",
+        default="xlsx",
         help="Output file type (csv, xlsx, gsheets, mongodb or sqlite)",
     )
-    arg_parser.add_argument("-of", "--output_file", default="results.csv", help="Output file name")
+    arg_parser.add_argument("-of", "--output_file", default="results.xlsx", help="Output file name")
     arg_parser.add_argument(
         "-sm", "--share_mail", help="Mail address to share Google Sheets document"
     )
@@ -109,8 +113,12 @@ def main(args) -> None:
     :pram args: Command line args returned by ArgumentParser
     """
 
-    api_service = TwitterAPIService(args.forme)
-    api_service.setup_api_access()
+    try:
+        api_service = TwitterAPIService(args.forme)
+        api_service.setup_api_access()
+
+    except TwitterAPISetupError as exp:
+        handle_exception(exp)
 
     try:
         extractor = ExtractorFactory.get_extractor(args)

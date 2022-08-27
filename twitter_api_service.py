@@ -4,7 +4,7 @@ from typing import Optional, Generator
 
 import tweepy
 
-from exceptions import PrivateAccountError
+from exceptions import TwitterAPISetupError, PrivateAccountError
 from utils import logger
 
 
@@ -30,7 +30,7 @@ class TwitterAPIService:
         self._external_user_creds_file = "external_user_creds.json"
 
     def setup_api_access(self) -> None:
-        """Setup access for developer or authorized user"""
+        """Setup access for developer or authorized(external) user"""
 
         if self._forme:
             self._setup_api_access_v2()
@@ -109,11 +109,7 @@ class TwitterAPIService:
             user_auth=user_auth,
         )
 
-        if expansions:
-            users_data, users_includes = response.data, response.includes["tweets"]
-        else:
-            users_data = response.data
-            users_includes = []
+        users_data, users_includes = response.data, response.includes.get("tweets", [])
 
         user_include_pairs = []
 
@@ -154,10 +150,10 @@ class TwitterAPIService:
         :returns: List of user data and includes objects as tuple
         """
 
-        if self._is_account_protected(username):
+        if self._is_account_protected(username, user_auth=user_auth):
             raise PrivateAccountError("Could not extract data from private account!")
 
-        user = self.get_user(username)[0]
+        user = self.get_user(username, user_auth=user_auth)[0]
 
         for response in tweepy.Paginator(
             self._current_client.get_users_following,
@@ -167,7 +163,7 @@ class TwitterAPIService:
             expansions=expansions,
             user_auth=user_auth,
         ):
-            friends_data, friends_includes = response.data, response.includes["tweets"]
+            friends_data, friends_includes = response.data, response.includes.get("tweets", [])
 
             user_include_pairs = []
 
@@ -208,10 +204,10 @@ class TwitterAPIService:
         :returns: List of user data and includes objects as tuple
         """
 
-        if self._is_account_protected(username):
+        if self._is_account_protected(username, user_auth=user_auth):
             raise PrivateAccountError("Could not extract data from private account!")
 
-        user = self.get_user(username)[0]
+        user = self.get_user(username, user_auth=user_auth)[0]
 
         for response in tweepy.Paginator(
             self._current_client.get_users_followers,
@@ -221,7 +217,7 @@ class TwitterAPIService:
             expansions=expansions,
             user_auth=user_auth,
         ):
-            followers_data, followers_includes = response.data, response.includes["tweets"]
+            followers_data, followers_includes = response.data, response.includes.get("tweets", [])
 
             user_include_pairs = []
 
@@ -271,7 +267,7 @@ class TwitterAPIService:
         :returns: List of tweet data and includes objects as tuple
         """
 
-        if self._is_account_protected(username):
+        if self._is_account_protected(username, user_auth=user_auth):
             raise PrivateAccountError("Could not extract data from private account!")
 
         user = self.get_user(username)[0]
@@ -418,7 +414,7 @@ class TwitterAPIService:
             for tweet_data in tweet_include_pairs:
                 yield tweet_data
 
-    def _is_account_protected(self, username: str) -> bool:
+    def _is_account_protected(self, username: str, user_auth: bool = False) -> bool:
         """Check if account is protected
 
         :type username: str
@@ -427,7 +423,7 @@ class TwitterAPIService:
         :returns: Whether account is protected
         """
 
-        response = self._current_client.get_user(username=username, user_fields="protected")
+        response = self._current_client.get_user(username=username, user_fields="protected", user_auth=user_auth)
 
         return response.data.protected
 
@@ -441,8 +437,10 @@ class TwitterAPIService:
             ACCESS_TOKEN_SECRET = os.environ["TWITTER_ACCESS_TOKEN_SECRET"]
             CONSUMER_KEY = os.environ["TWITTER_CONSUMER_KEY"]
             CONSUMER_SECRET = os.environ["TWITTER_CONSUMER_SECRET"]
-        except KeyError:
-            logger.error("Failed to find credentials setup! Setup environment variables.")
+        except KeyError as exp:
+            raise TwitterAPISetupError(
+                "Failed to find credentials setup! Setup environment variables."
+            ) from exp
 
         auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
         auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
@@ -456,8 +454,10 @@ class TwitterAPIService:
 
         try:
             BEARER_TOKEN = os.environ["TWITTER_BEARER_TOKEN_CODE"]
-        except KeyError:
-            logger.error("Failed to find credentials setup! Setup environment variables.")
+        except KeyError as exp:
+            raise TwitterAPISetupError(
+                "Failed to find credentials setup! Setup environment variables."
+            ) from exp
 
         self._api_v2 = tweepy.Client(bearer_token=BEARER_TOKEN, wait_on_rate_limit=True)
 
@@ -469,14 +469,16 @@ class TwitterAPIService:
         try:
             CONSUMER_KEY = os.environ["TWITTER_CONSUMER_KEY_CODE"]
             CONSUMER_SECRET = os.environ["TWITTER_CONSUMER_SECRET_CODE"]
-        except KeyError:
-            logger.error("Failed to find credentials setup! Setup environment variables.")
+        except KeyError as exp:
+            raise TwitterAPISetupError(
+                "Failed to find credentials setup! Setup environment variables."
+            ) from exp
 
         oauth1_user_handler = tweepy.OAuth1UserHandler(
             CONSUMER_KEY, CONSUMER_SECRET, callback="oob"
         )
 
-        if not self._is_credentials_exists():
+        if not self._is_credentials_exist():
             print("\nPlease get the PIN from the following URL\n")
 
             print(oauth1_user_handler.get_authorization_url())
@@ -529,7 +531,7 @@ class TwitterAPIService:
 
         return (creds_data["access_token"], creds_data["access_token_secret"])
 
-    def _is_credentials_exists(self) -> bool:
+    def _is_credentials_exist(self) -> bool:
         """Check if the credentials file exists
 
         :rtype: bool
