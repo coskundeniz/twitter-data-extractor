@@ -4,7 +4,7 @@
     "search": "",
     "excludes": "retweets",
     "tweet_count": 20,
-    "output_type": "csv",
-    "output_file": "results.csv",
+    "output_type": "xlsx",
+    "output_file": "results.xlsx",
     "share_mail": "codenineeight@gmail.com"
 }
