@@ -58,10 +58,7 @@ def get_arg_parser() -> ArgumentParser:
         "-ul", "--users", help="Extract user data for the given comma separated usernames"
     )
     arg_parser.add_argument(
-        "-fr",
-        "--friends",
-        action="store_true",
-        help="Extract friends data for the given username"
+        "-fr", "--friends", action="store_true", help="Extract friends data for the given username"
     )
     arg_parser.add_argument(
         "-fl",

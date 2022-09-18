@@ -88,8 +88,6 @@ class TwitterAPIService:
         https://docs.tweepy.org/en/latest/client.html#user-fields
         https://docs.tweepy.org/en/latest/client.html#expansions
 
-        Pinned tweets are not queried for multiple users.
-
         :type usernames: list
         :param usernames: Twitter usernames
         :type user_fields: list
@@ -319,6 +317,7 @@ class TwitterAPIService:
     def get_search_tweets(
         self,
         search_keyword: str,
+        excludes: Optional[list[str]] = None,
         tweet_fields: Optional[list[str]] = None,
         place_fields: Optional[list[str]] = None,
         media_fields: Optional[list[str]] = None,
@@ -361,7 +360,13 @@ class TwitterAPIService:
             "verified",
         ]
 
-        query = f"{search_keyword} -is:retweet"
+        query = f"{search_keyword}"
+
+        for exclude in excludes:
+            if exclude == "replies":
+                query += f" -is:reply"
+            elif exclude == "retweets":
+                query += f" -is:retweet"
 
         for response in tweepy.Paginator(
             self._current_client.search_recent_tweets,
@@ -423,7 +428,9 @@ class TwitterAPIService:
         :returns: Whether account is protected
         """
 
-        response = self._current_client.get_user(username=username, user_fields="protected", user_auth=user_auth)
+        response = self._current_client.get_user(
+            username=username, user_fields="protected", user_auth=user_auth
+        )
 
         return response.data.protected
 

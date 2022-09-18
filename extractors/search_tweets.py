@@ -41,6 +41,7 @@ class SearchTweetsExtractor(TweetsExtractor):
 
         for tweet_data in api_service.get_search_tweets(
             self._search_keyword,
+            self._exclude,
             tweet_fields=self._tweet_fields,
             place_fields=self._place_fields,
             media_fields=self._media_fields,
