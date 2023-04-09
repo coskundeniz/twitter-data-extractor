@@ -26,7 +26,6 @@ class SQLiteReporter(DatabaseReporter):
     """
 
     def __init__(self, extracted_data_type: ExtractedDataType) -> None:
-
         super().__init__(extracted_data_type)
 
         self._create_db_tables()
@@ -63,14 +62,12 @@ class SQLiteReporter(DatabaseReporter):
         if self._extracted_data_type == ExtractedDataType.USERS:
             logger.debug("Saving users data...")
         else:
-            logger.debug(
-                f"Saving {'friends' if is_friends_data else 'followers'} data..."
-            )
+            logger.debug(f"Saving {'friends' if is_friends_data else 'followers'} data...")
 
         for user_data_item in extracted_data:
             self._save_one_user(user_data_item)
 
-    def _save_one_user(self, extracted_data) -> None:
+    def _save_one_user(self, extracted_data: User) -> None:
         """Save one user to database
 
         Raises ExtractorDatabaseError if an error occurs
@@ -86,9 +83,7 @@ class SQLiteReporter(DatabaseReporter):
                 name = extracted_data.data["name"]
                 username = extracted_data.data["username"]
 
-                users_db_cursor.execute(
-                    "SELECT user_id FROM users WHERE user_id=?", (user_id,)
-                )
+                users_db_cursor.execute("SELECT user_id FROM users WHERE user_id=?", (user_id,))
 
                 found = users_db_cursor.fetchone()
 
@@ -138,9 +133,7 @@ class SQLiteReporter(DatabaseReporter):
 
         try:
             with tweets_db() as tweets_db_cursor:
-
                 for tweet_data_item in extracted_data:
-
                     tweet_id = tweet_data_item.data["id"]
 
                     tweets_db_cursor.execute(
@@ -152,7 +145,6 @@ class SQLiteReporter(DatabaseReporter):
                     params = DatabaseReporter._get_tweet_row_data(tweet_data_item.data)
 
                     if not found:
-
                         if table == "user_tweets":
                             tweets_db_cursor.execute(
                                 f"INSERT INTO {table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -252,9 +244,8 @@ class SQLiteReporter(DatabaseReporter):
         :returns: Database connection cursor
         """
 
-        users_db = sqlite3.connect("users.db")
-
         try:
+            users_db = sqlite3.connect("users.db")
             yield users_db.cursor()
 
         except sqlite3.Error as exp:
@@ -273,9 +264,8 @@ class SQLiteReporter(DatabaseReporter):
         :returns: Database connection cursor
         """
 
-        user_tweets_db = sqlite3.connect("user_tweets.db")
-
         try:
+            user_tweets_db = sqlite3.connect("user_tweets.db")
             yield user_tweets_db.cursor()
 
         except sqlite3.Error as exp:
@@ -293,9 +283,8 @@ class SQLiteReporter(DatabaseReporter):
         :returns: Database connection cursor
         """
 
-        search_tweets_db = sqlite3.connect("search_tweets.db")
-
         try:
+            search_tweets_db = sqlite3.connect("search_tweets.db")
             yield search_tweets_db.cursor()
 
         except sqlite3.Error as exp:

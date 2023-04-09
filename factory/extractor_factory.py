@@ -2,11 +2,11 @@ from typing import Union
 
 from extractors.base_extractor import BaseExtractor
 from extractors.tweets import TweetsExtractor
-from extractors.user import UserExtractor, UsersExtractor
-from extractors.friends import FriendsExtractor
-from extractors.followers import FollowersExtractor
-from extractors.user_tweets import UserTweetsExtractor
-from extractors.search_tweets import SearchTweetsExtractor
+from extractors.user import UserExtractor, Users
+from extractors.friends import Friends
+from extractors.followers import Followers
+from extractors.user_tweets import UserTweets
+from extractors.search_tweets import SearchTweets
 from exceptions import UnsupportedExtractorError
 from utils import get_configuration
 
@@ -59,15 +59,15 @@ class ExtractorFactory:
         if is_user_extractor:
             extractor = UserExtractor(cmdline_args)
         elif is_users_extractor:
-            extractor = UsersExtractor(cmdline_args)
+            extractor = Users(cmdline_args)
         elif is_friends_extractor:
-            extractor = FriendsExtractor(cmdline_args)
+            extractor = Friends(cmdline_args)
         elif is_followers_extractor:
-            extractor = FollowersExtractor(cmdline_args)
+            extractor = Followers(cmdline_args)
         elif is_user_tweets_extractor:
-            extractor = UserTweetsExtractor(cmdline_args)
+            extractor = UserTweets(cmdline_args)
         elif is_search_tweets_extractor:
-            extractor = SearchTweetsExtractor(cmdline_args)
+            extractor = SearchTweets(cmdline_args)
         else:
             raise UnsupportedExtractorError("Unsupported extractor! Check your parameters.")
 

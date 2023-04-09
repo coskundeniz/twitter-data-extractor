@@ -9,7 +9,7 @@ from utils import logger
 Tweets = Generator[Tweet, None, None]
 
 
-class SearchTweetsExtractor(TweetsExtractor):
+class SearchTweets(TweetsExtractor):
     """Extract tweets for a search keyword
 
     :type cmdline_args: Namespace

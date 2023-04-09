@@ -7,7 +7,7 @@ from utils import logger, get_configuration
 from twitter_api_service import TwitterAPIService
 
 
-Users = Generator[User, None, None]
+UsersData = Generator[User, None, None]
 
 
 class UserExtractor(BaseExtractor):
@@ -72,7 +72,7 @@ class UserExtractor(BaseExtractor):
         return user_data
 
 
-class UsersExtractor(UserExtractor):
+class Users(UserExtractor):
     """Extract data for multiple users
 
     :type cmdline_args: Namespace
@@ -85,7 +85,7 @@ class UsersExtractor(UserExtractor):
 
         self._usernames = self._config["users"] if cmdline_args.useconfig else cmdline_args.users
 
-    def extract_data(self, api_service: TwitterAPIService) -> Users:
+    def extract_data(self, api_service: TwitterAPIService) -> UsersData:
         """Extract data for multiple users
 
         Raises MissingUsernameParameter if username(-u) parameter

@@ -20,7 +20,7 @@ class TwitterAPIService:
     :param forme: Whether the API will be used for account owner or authorized user
     """
 
-    def __init__(self, forme: bool = False) -> None:
+    def __init__(self, forme: Optional[bool] = False) -> None:
 
         self._forme = forme
         self._api_v1 = None
@@ -419,11 +419,13 @@ class TwitterAPIService:
             for tweet_data in tweet_include_pairs:
                 yield tweet_data
 
-    def _is_account_protected(self, username: str, user_auth: bool = False) -> bool:
+    def _is_account_protected(self, username: str, user_auth: Optional[bool] = False) -> bool:
         """Check if account is protected
 
         :type username: str
         :param username: Twitter username
+        :type user_auth: bool
+        :param user_auth: Whether requests are done on behalf of another account
         :rtype: bool
         :returns: Whether account is protected
         """

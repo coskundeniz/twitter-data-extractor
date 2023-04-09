@@ -101,7 +101,7 @@ Logs can be seen in the *tw_data_extractor.log* file in the project directory.
 * Get the last tweets data for username gvanrossum.
     * `python twitter_data_extractor.py --forme -u gvanrossum -ut`
 
-* Get the last 50 tweets data for username gvanrossum and exclude both  replies and retweets.
+* Get the last 50 tweets data for username gvanrossum and exclude both replies and retweets.
     * `python twitter_data_extractor.py --forme -u gvanrossum -ut -tc 50 -e "replies,retweets"`
 
 * Get the last 50 tweets data for keyword python.

@@ -6,7 +6,6 @@ from models.user import User
 
 @dataclass
 class Tweet:
-
     tweet: tuple
     data: dict = field(default_factory=dict, init=False)
 
@@ -46,7 +45,6 @@ class Tweet:
         self.data["places"] = []
 
         if self._includes:
-
             if "media" in self._includes:
                 for media_item in self._includes["media"]:
                     self.data["media"].append(media_item)
@@ -59,7 +57,6 @@ class Tweet:
                 self.data["author"] = self._includes["author"]
 
     def __str__(self) -> str:
-
         tweet_data_format = f"ID: {self.data['id']}\n"
         tweet_data_format += f"\tTweet: {self.data['text']}\n"
         tweet_data_format += f"\tCreated at: {self.data['created_at']}\n"
@@ -71,7 +68,6 @@ class Tweet:
             tweet_data_format += f"\t\t{metric}: {value}\n"
 
         if self._fields.entities:
-
             tweet_data_format += "\tURLs\n" if self.data["entities"]["url_items"] else ""
             for url_item in self.data["entities"]["url_items"]:
                 tweet_data_format += f"\t\t{url_item}\n"

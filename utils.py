@@ -2,6 +2,7 @@ import json
 import logging
 from enum import Enum, auto
 from logging.handlers import RotatingFileHandler
+from typing import Optional
 
 from exceptions import UnsupportedConfigFileError
 
@@ -34,7 +35,6 @@ logger.addHandler(file_handler)
 
 
 class ExtractedDataType(Enum):
-
     USER = auto()
     USERS = auto()
     FRIENDS = auto()
@@ -43,7 +43,7 @@ class ExtractedDataType(Enum):
     SEARCH_TWEETS = auto()
 
 
-def get_configuration(filename: str = "config.json") -> dict:
+def get_configuration(filename: Optional[str] = "config.json") -> dict:
     """Read configuration file
 
     :type filename: str
@@ -86,12 +86,8 @@ def get_extracted_data_type(args: "Namespace") -> ExtractedDataType:
         is_user_tweets_extractor = config["user"] and args.user_tweets
         is_search_tweets_extractor = config["search"]
     else:
-        is_user_extractor = args.user and not (
-            args.friends or args.followers or args.user_tweets
-        )
-        is_users_extractor = args.users and not (
-            args.friends or args.followers or args.user_tweets
-        )
+        is_user_extractor = args.user and not (args.friends or args.followers or args.user_tweets)
+        is_users_extractor = args.users and not (args.friends or args.followers or args.user_tweets)
         is_friends_extractor = args.user and args.friends
         is_followers_extractor = args.user and args.followers
         is_user_tweets_extractor = args.user and args.user_tweets

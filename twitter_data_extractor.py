@@ -139,7 +139,6 @@ def main(args) -> None:
 
 
 if __name__ == "__main__":
-
     arg_parser = get_arg_parser()
     args = arg_parser.parse_args()
 

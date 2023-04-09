@@ -10,7 +10,7 @@ from utils import logger
 Tweets = Generator[Tweet, None, None]
 
 
-class UserTweetsExtractor(TweetsExtractor):
+class UserTweets(TweetsExtractor):
     """Extract tweets of a user
 
     :type cmdline_args: Namespace

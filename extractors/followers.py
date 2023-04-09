@@ -6,10 +6,10 @@ from models.user import User
 from utils import logger
 
 
-Followers = Generator[User, None, None]
+FollowersData = Generator[User, None, None]
 
 
-class FollowersExtractor(UserExtractor):
+class Followers(UserExtractor):
     """Extract followers data of a user
 
     :type cmdline_args: Namespace
@@ -20,7 +20,7 @@ class FollowersExtractor(UserExtractor):
 
         super().__init__(cmdline_args)
 
-    def extract_data(self, api_service: TwitterAPIService) -> Followers:
+    def extract_data(self, api_service: TwitterAPIService) -> FollowersData:
         """Extract all followers of the given user
 
         :type api_service: TwitterAPIService

@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 
 @dataclass
 class User:
-
     user: tuple
     data: dict = field(default_factory=dict, init=False)
 
@@ -65,14 +64,12 @@ class User:
         self.data["verified"] = self._fields.verified
 
     def __str__(self) -> str:
-
         user_data_format = f"{self.data['id']}:{self.data['username']}:{self.data['name']}\n"
 
         user_data_format += f"\tCreated at: {self.data['created_at']}\n"
         user_data_format += f"\tBio: {self.data['description']}\n"
 
         if self._fields.entities:
-
             user_data_format += "\tURLs\n" if self.data["entities"]["url_items"] else ""
             for url_item in self.data["entities"]["url_items"]:
                 user_data_format += f"\t\t{url_item}\n"

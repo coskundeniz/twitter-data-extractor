@@ -6,10 +6,10 @@ from models.user import User
 from utils import logger
 
 
-Friends = Generator[User, None, None]
+FriendsData = Generator[User, None, None]
 
 
-class FriendsExtractor(UserExtractor):
+class Friends(UserExtractor):
     """Extract friends data of a user
 
     :type cmdline_args: Namespace
@@ -20,7 +20,7 @@ class FriendsExtractor(UserExtractor):
 
         super().__init__(cmdline_args)
 
-    def extract_data(self, api_service: TwitterAPIService) -> Friends:
+    def extract_data(self, api_service: TwitterAPIService) -> FriendsData:
         """Extract all friends of the given user
 
         :type api_service: TwitterAPIService
