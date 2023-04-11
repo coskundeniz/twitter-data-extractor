@@ -364,9 +364,9 @@ class TwitterAPIService:
 
         for exclude in excludes:
             if exclude == "replies":
-                query += f" -is:reply"
+                query += " -is:reply"
             elif exclude == "retweets":
-                query += f" -is:retweet"
+                query += " -is:retweet"
 
         for response in tweepy.Paginator(
             self._current_client.search_recent_tweets,

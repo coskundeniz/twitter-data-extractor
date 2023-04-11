@@ -12,7 +12,7 @@ from utils import get_configuration, get_extracted_data_type
 
 
 class ReporterFactory:
-    """Factory class for url readers"""
+    """Factory class for reporters"""
 
     @staticmethod
     def get_reporter(

@@ -12,6 +12,33 @@ This command-line tool extracts user and tweet data from Twitter and reports the
 * Report results to CSV, Excel or Google Sheets documents.
 * Report results to MongoDB or SQLite databases.
 
+**Fields to extract for user data**
+* User ID
+* Username
+* Name
+* Account creation date
+* Bio
+* URLs, Hashtags, Mentions
+* Location
+* Pinned Tweet ID
+* Pinned Tweet
+* Profile image URL
+* Account protected flag
+* Public metrics (followers/following/tweet/listed counts)
+* External URL
+* Verified flag
+
+**Fields to extract for tweet data**
+* Tweet ID
+* Tweet text
+* Tweet creation date
+* Source
+* Language
+* Public metrics (retweet/reply/like/quote count)
+* URLs, Hashtags, Mentions
+* Media (key, type, url, duration_ms(for video), width, height, public_metrics)
+* Place (ID, full name, country, country code, place type, geo coordinates)
+* Author data (for search tweets)
 
 ## How to setup
 

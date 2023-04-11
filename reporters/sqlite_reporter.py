@@ -16,10 +16,7 @@ DBCursor = sqlite3.Connection.cursor
 
 
 class SQLiteReporter(DatabaseReporter):
-    """SQLite database
-
-    Raises ExtractorDatabaseError if database connection
-    is not established in 2 seconds.
+    """SQLite database reporter
 
     :type extracted_data_type: ExtractedDataType
     :param extracted_data_type: Enum value for the extracted data type
