@@ -24,7 +24,7 @@ class MongoDBReporter(DatabaseReporter):
     :param extracted_data_type: Enum value for the extracted data type
     """
 
-    DB_NAME = "tw_data_extractor_db_test"  # TODO: change before final version
+    DB_NAME = "tw_data_extractor_db"
     DB_ADDR = "0.0.0.0"
     DB_PORT = 27017
 
