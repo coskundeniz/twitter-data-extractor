@@ -96,8 +96,6 @@ class ExcelReporter(FileReporter):
     def _create_workbook(self) -> openpyxl.Workbook:
         """Create workbook
 
-        If file exists, workbook is loaded by using it.
-
         :rtype: Workbook
         :returns: Workbook instance
         """

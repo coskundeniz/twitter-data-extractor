@@ -51,10 +51,9 @@ This command-line tool extracts user and tweet data from Twitter and reports the
 
 ### Setting Environment Variables
 
-If you will use your own Twitter API credentials, set the *TWITTER_BEARER_TOKEN_CODE* environment variable with your bearer token value.
+For using the Twitter API service, set the `TWITTER_BEARER_TOKEN_CODE` environment variable with your bearer token value. Set the `TWITTER_CONSUMER_KEY_CODE` and `TWITTER_CONSUMER_SECRET_CODE` environment variables for your consumer key and consumer secret tokens to use the tool on behalf of another user account.
 
-If you will use my account on behalf of your account, send email to support email at the end of this document to get my consumer key and secret tokens and set these to *TWITTER_CONSUMER_KEY_CODE* and *TWITTER_CONSUMER_SECRET_CODE* environment variables.
-
+You can see the instructions to set environment variables [here for Linux](https://phoenixnap.com/kb/linux-set-environment-variable), [here for Windows](https://phoenixnap.com/kb/windows-set-environment-variable), and [here for Mac](https://phoenixnap.com/kb/set-environment-variable-mac).
 
 ### MongoDB Installation
 
@@ -142,3 +141,5 @@ Logs can be seen in the *tw_data_extractor.log* file in the project directory.
 ## Support
 
 If you need support, you can contact me by emailing to codenineeight@gmail.com with the “twitter_data_extractor” prefix in the subject. You can also see my Upwork profile [here](https://www.upwork.com/freelancers/~011e3fe44e575092f0).
+
+If you benefit from this tool, please consider donating using the sponsor links.
