@@ -3,6 +3,8 @@ Twitter Data Extractor
 
 This command-line tool extracts user and tweet data from Twitter and reports the results to CSV, Excel, Google Sheets documents or MongoDB, SQLite databases.
 
+[Related post on Medium](https://medium.com/@codenineeight/designing-a-twitter-data-extractor-tool-using-python-part-1-intro-50cd1c6fcb2e)
+
 ### Supported Features
 
 * Extract single/multiple user data.
