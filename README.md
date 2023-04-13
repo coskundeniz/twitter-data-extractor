@@ -138,6 +138,20 @@ Logs can be seen in the *tw_data_extractor.log* file in the project directory.
 * Get the last tweets data for keyword python and write results to Google Sheets document with name last_tweets and share with the given email.
     * `python twitter_data_extractor.py -s python -ot gsheets -of last_tweets -sm codenineeight@gmail.com`
 
+### Example Runs & Outputs
+
+* Search the last 20 tweet data for the keyword "python" and save it to the results.xlsx file.
+    * `python twitter_data_extractor.py -s python -tc 20`
+
+![Tweets Search](assets/python_tweet_search.gif)
+
+* Get the last 5 tweets data excluding replies and retweets for the username "gvanrossum" and write results to Google Sheets document named as "gvanrossum_last_tweets" and share with the given email.
+    * `python twitter_data_extractor.py --forme -u gvanrossum -ut -tc 5 -e "replies-retweets" -ot gsheets -of gvanrossum_last_tweets -sm codenineeight@gmail.com`
+
+![User Tweets Run](assets/gvanrossum_tweets.gif)
+
+![User Tweets Output](assets/gvanrossum_tweets.png)
+
 ---
 
 ## Support
