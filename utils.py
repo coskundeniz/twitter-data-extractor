@@ -43,19 +43,19 @@ class ExtractedDataType(Enum):
     SEARCH_TWEETS = auto()
 
 
-def get_configuration(filename: Optional[str] = "config.json") -> dict:
+def get_configuration(config_file: Optional[str] = "config.json") -> dict:
     """Read configuration file
 
-    :type filename: str
-    :param filename: Name of the configuration file
+    :type config_file: str
+    :param config_file: Path of the configuration file
     :rtype: dict
     :returns: Configuration as dictionary
     """
 
-    if not filename.endswith(".json"):
+    if not config_file.endswith(".json"):
         raise UnsupportedConfigFileError("Config file must be a json file!")
 
-    with open(filename, encoding="utf-8") as configfile:
+    with open(config_file, encoding="utf-8") as configfile:
         config = json.load(configfile)
 
     return config

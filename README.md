@@ -91,9 +91,23 @@ optional arguments:
   -sm SHARE_MAIL, --share_mail SHARE_MAIL     Mail address to share Google Sheets document
 ```
 
-* If config will be used for getting parameters, boolean parameters like --forme, --friends still must be passed as command-line option.
+* If config will be used for getting parameters, boolean parameters like --forme, --friends, --followers, --user_tweets still must be passed as command-line option.
 * "user" and "users" field should be empty for "search" keyword to be used.
 
+The following is an example of config.json content.
+
+```json
+{
+    "user": "gvanrossum",
+    "users": "",
+    "search": "",
+    "excludes": "retweets",
+    "tweet_count": 20,
+    "output_type": "xlsx",
+    "output_file": "results.xlsx",
+    "share_mail": "codenineeight@gmail.com"
+}
+```
 
 ### Basic Usage
 
@@ -111,36 +125,42 @@ Logs can be seen in the *tw_data_extractor.log* file in the project directory.
 
 ### Example Commands
 
-* Get user data for username gvanrossum and save results to results.xlsx file.
+* Get user data for username *gvanrossum* and save results to *results.xlsx* file on behalf of another account.
     * `python twitter_data_extractor.py -u gvanrossum`
 
-* Get user data for username gvanrossum and save results to results.xlsx file with your own Twitter API credentials.
+* Get user data for username *gvanrossum* and save results to *results.xlsx* file for your own account.
     * `python twitter_data_extractor.py --forme -u gvanrossum`
 
-* Get user data for usernames gvanrossum and nedbat.
+* Get user data for *gvanrossum* and write the results to *results.xlsx* by getting parameters from the default config file(*config.json*).
+    * `python twitter_data_extractor.py --forme -c`
+
+* Get user data for *gvanrossum* and write the results to *results.xlsx* by getting parameters from the given config file.
+    * `python twitter_data_extractor.py --forme -c -cf /home/coskun/custom_config.json`
+
+* Get user data for usernames *gvanrossum* and *nedbat*.
     * `python twitter_data_extractor.py -ul "gvanrossum,nedbat"`
 
-* Get friends data for username gvanrossum and save results to results.csv file.
+* Get friends data for username *gvanrossum* and save results to *results.csv* file.
     * `python twitter_data_extractor.py -u gvanrossum -fr -ot csv -of results.csv`
 
-* Get followers data for username gvanrossum.
+* Get followers data for username *gvanrossum*.
     * `python twitter_data_extractor.py -u gvanrossum -fl`
 
-* Get the last tweets data for username gvanrossum.
+* Get the last tweets data for username *gvanrossum*.
     * `python twitter_data_extractor.py --forme -u gvanrossum -ut`
 
-* Get the last 50 tweets data for username gvanrossum and exclude both replies and retweets.
+* Get the last 50 tweets data for username *gvanrossum* and exclude both *replies* and *retweets*.
     * `python twitter_data_extractor.py --forme -u gvanrossum -ut -tc 50 -e "replies,retweets"`
 
-* Get the last 50 tweets data for keyword python.
+* Get the last 50 tweets data for keyword *python*.
     * `python twitter_data_extractor.py -s python -tc 50`
 
-* Get the last tweets data for keyword python and write results to Google Sheets document with name last_tweets and share with the given email.
+* Get the last tweets data for keyword *python* and write results to Google Sheets document with name *last_tweets* and share with the given email.
     * `python twitter_data_extractor.py -s python -ot gsheets -of last_tweets -sm codenineeight@gmail.com`
 
 ### Example Runs & Outputs
 
-* Search the last 20 tweet data for the keyword "python" and save it to the results.xlsx file.
+* Search the last 20 tweet data for the keyword "python" and save it to the "results.xlsx" file.
     * `python twitter_data_extractor.py -s python -tc 20`
 
 ![Tweets Search](assets/python_tweet_search.gif)
