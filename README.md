@@ -42,6 +42,8 @@ This command-line tool extracts user and tweet data from Twitter and reports the
 * Place (ID, full name, country, country code, place type, geo coordinates)
 * Author data (for search tweets)
 
+You can see the user manual [here](https://github.com/coskundeniz/twitter-data-extractor/blob/main/docs/user_manual.pdf).
+
 ## How to setup
 
 * Run the following commands to install required packages in the project directory.
