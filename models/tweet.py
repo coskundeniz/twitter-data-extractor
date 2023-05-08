@@ -88,7 +88,10 @@ class Tweet:
 
             if media["type"] == "video":
                 tweet_data_format += f"\t\tDuration: {media['duration_ms']}\n"
-                tweet_data_format += f"\t\tView count: {media['public_metrics']['view_count']}\n"
+                if media["public_metrics"]:
+                    tweet_data_format += (
+                        f"\t\tView count: {media['public_metrics']['view_count']}\n"
+                    )
 
         tweet_data_format += "\tPlace\n" if self.data.get("place") else ""
         for place in self.data["places"]:

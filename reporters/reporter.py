@@ -130,7 +130,8 @@ class Reporter(ABC):
 
                 if media["type"] == "video":
                     media_data += f"Duration: {media['duration_ms']}\n"
-                    media_data += f"View count: {media['public_metrics']['view_count']}\n"
+                    if media["public_metrics"]:
+                        media_data += f"View count: {media['public_metrics']['view_count']}\n"
 
                 if len(data["media"]) > 1:
                     media_data += "\n-------\n"

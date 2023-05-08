@@ -2,11 +2,16 @@ from string import ascii_uppercase
 
 import openpyxl
 from openpyxl.styles import Font
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+from openpyxl.utils.exceptions import IllegalCharacterError
 
 from models.user import User
 from models.tweet import Tweet
 from reporters.file_reporter import FileReporter
 from utils import logger, ExtractedDataType
+
+
+MAX_ROWS_IN_SHEET = 1048576
 
 
 class ExcelReporter(FileReporter):
@@ -23,6 +28,7 @@ class ExcelReporter(FileReporter):
         super().__init__(filename, extracted_data_type)
 
         self._sheet = None
+        self._second_sheet = None
 
     def _save_user_data(self, extracted_data: User) -> None:
         """Save single user data
@@ -38,9 +44,27 @@ class ExcelReporter(FileReporter):
 
         logger.info(extracted_data)
 
-        self._add_user_header()
+        self._add_user_header(self._sheet)
 
-        self._sheet.append(FileReporter._get_user_row_data(extracted_data.data))
+        try:
+            self._sheet.append(FileReporter._get_user_row_data(extracted_data.data))
+        except IllegalCharacterError:
+            extracted_data.data["description"] = ILLEGAL_CHARACTERS_RE.sub(
+                r"", extracted_data.data["description"]
+            )
+            extracted_data.data["name"] = ILLEGAL_CHARACTERS_RE.sub(
+                r"", extracted_data.data["name"]
+            )
+            extracted_data.data["pinned_tweet_text"] = ILLEGAL_CHARACTERS_RE.sub(
+                r"", extracted_data.data["pinned_tweet_text"]
+            )
+
+            try:
+                self._sheet.append(FileReporter._get_user_row_data(extracted_data.data))
+            except IllegalCharacterError:
+                logger.error(
+                    f"Received IllegalCharacterError for {extracted_data.data['username']}. Skipping..."
+                )
 
         self._adjust_column_widths()
 
@@ -63,10 +87,50 @@ class ExcelReporter(FileReporter):
         workbook = self._create_workbook()
         self._sheet = workbook.active
 
-        self._add_user_header()
+        self._add_user_header(self._sheet)
+
+        rows_added = 1
 
         for user_data_item in extracted_data:
-            self._sheet.append(FileReporter._get_user_row_data(user_data_item.data))
+            try:
+                if rows_added == MAX_ROWS_IN_SHEET - 1:
+                    logger.debug(
+                        "Max row per worksheet limit will be reached. Creating new worksheet..."
+                    )
+                    self._second_sheet = workbook.create_sheet()
+                    self._add_user_header(self._second_sheet)
+
+                if rows_added < MAX_ROWS_IN_SHEET:
+                    self._sheet.append(FileReporter._get_user_row_data(user_data_item.data))
+                else:
+                    self._second_sheet.append(FileReporter._get_user_row_data(user_data_item.data))
+
+                rows_added += 1
+
+            except IllegalCharacterError:
+                user_data_item.data["description"] = ILLEGAL_CHARACTERS_RE.sub(
+                    r"", user_data_item.data["description"]
+                )
+                user_data_item.data["name"] = ILLEGAL_CHARACTERS_RE.sub(
+                    r"", user_data_item.data["name"]
+                )
+                user_data_item.data["pinned_tweet_text"] = ILLEGAL_CHARACTERS_RE.sub(
+                    r"", user_data_item.data["pinned_tweet_text"]
+                )
+
+                try:
+                    if rows_added < MAX_ROWS_IN_SHEET:
+                        self._sheet.append(FileReporter._get_user_row_data(user_data_item.data))
+                    else:
+                        self._second_sheet.append(
+                            FileReporter._get_user_row_data(user_data_item.data)
+                        )
+
+                    rows_added += 1
+                except IllegalCharacterError:
+                    logger.error(
+                        f"Received IllegalCharacterError for {user_data_item.data['username']}. Skipping..."
+                    )
 
         self._adjust_column_widths()
 
@@ -84,10 +148,46 @@ class ExcelReporter(FileReporter):
         workbook = self._create_workbook()
         self._sheet = workbook.active
 
-        self._add_tweet_header()
+        self._add_tweet_header(self._sheet)
+
+        rows_added = 1
 
         for tweet_data_item in extracted_data:
-            self._sheet.append(FileReporter._get_tweet_row_data(tweet_data_item.data))
+            try:
+                if rows_added == MAX_ROWS_IN_SHEET - 1:
+                    logger.debug(
+                        "Max row per worksheet limit will be reached. Creating new worksheet..."
+                    )
+                    self._second_sheet = workbook.create_sheet()
+                    self._add_tweet_header(self._second_sheet)
+
+                if rows_added < MAX_ROWS_IN_SHEET:
+                    self._sheet.append(FileReporter._get_tweet_row_data(tweet_data_item.data))
+                else:
+                    self._second_sheet.append(
+                        FileReporter._get_tweet_row_data(tweet_data_item.data)
+                    )
+
+                rows_added += 1
+
+            except IllegalCharacterError:
+                tweet_data_item.data["text"] = ILLEGAL_CHARACTERS_RE.sub(
+                    r"", tweet_data_item.data["text"]
+                )
+
+                try:
+                    if rows_added < MAX_ROWS_IN_SHEET:
+                        self._sheet.append(FileReporter._get_tweet_row_data(tweet_data_item.data))
+                    else:
+                        self._second_sheet.append(
+                            FileReporter._get_tweet_row_data(tweet_data_item.data)
+                        )
+
+                    rows_added += 1
+                except IllegalCharacterError:
+                    logger.error(
+                        f"Received IllegalCharacterError for id={tweet_data_item.data['id']}. Skipping..."
+                    )
 
         self._adjust_column_widths()
 
@@ -104,36 +204,49 @@ class ExcelReporter(FileReporter):
 
         return workbook
 
-    def _add_user_header(self) -> None:
-        """Add user data header"""
+    def _add_user_header(self, sheet: openpyxl.worksheet.worksheet.Worksheet) -> None:
+        """Add user data header
+
+        :type sheet: openpyxl.worksheet.worksheet.Worksheet
+        :param sheet: Worksheet to add user data header
+        """
 
         for i, value in enumerate(self._user_data_header, start=1):
-            cell = self._sheet.cell(row=1, column=i)
+            cell = sheet.cell(row=1, column=i)
             cell.value = value
             cell.font = Font(bold=True)
 
-    def _add_tweet_header(self) -> None:
-        """Add tweet data header"""
+    def _add_tweet_header(self, sheet: openpyxl.worksheet.worksheet.Worksheet) -> None:
+        """Add tweet data header
+
+        :type sheet: openpyxl.worksheet.worksheet.Worksheet
+        :param sheet: Worksheet to add tweet data header
+        """
 
         if self._extracted_data_type == ExtractedDataType.USER_TWEETS:
             self._tweet_data_header.remove("Author")
 
         for i, value in enumerate(self._tweet_data_header, start=1):
-            cell = self._sheet.cell(row=1, column=i)
+            cell = sheet.cell(row=1, column=i)
             cell.value = value
             cell.font = Font(bold=True)
 
     def _adjust_column_widths(self) -> None:
-        """Adjust the width of given column according to maximum length of content"""
+        """Adjust the column widths according to maximum length of content"""
 
         columns = ascii_uppercase[: len(self._user_data_header)]
-        column_name = iter(columns)
+        sheets = [self._sheet]
 
-        for col in self._sheet.iter_cols():
-            contents = []
-            for cell in col:
-                contents.append(cell.value)
+        if self._second_sheet:
+            sheets.append(self._second_sheet)
 
-            max_content_length = max([len(str(content)) for content in contents])
+        for sheet in sheets:
+            column_name = iter(columns)
 
-            self._sheet.column_dimensions[next(column_name)].width = max_content_length + 2
+            for col in sheet.iter_cols():
+                contents = []
+                for cell in col:
+                    contents.append(cell.value)
+
+                max_content_length = max([len(str(content)) for content in contents])
+                sheet.column_dimensions[next(column_name)].width = max_content_length + 2
